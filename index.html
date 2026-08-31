@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#EFE7DB">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<title>好物分享博主专属工作台</title>
+<style>
+/* ========== 设计变量：奶油色 + 莫兰迪色系 ========== */
+:root{
+  --bg:#F6F1EA;            /* 页面奶油底色 */
+  --bg2:#FFFCF7;           /* 卡片表面 */
+  --bg3:#EFE7DB;           /* 侧栏底色 */
+  --ink:#443B31;           /* 主文字 */
+  --muted:#7E7465;         /* 次要文字 */
+  --rule:#E5DCCE;          /* 分隔线 */
+  --accent:#A97162;        /* 莫兰迪玫瑰（主强调色） */
+  --accent-soft:#F4E4DC;   /* 玫瑰浅底 */
+  --accent2:#7F9074;       /* 莫兰迪鼠尾草绿 */
+  --accent2-soft:#E6EBDF;  /* 鼠尾草浅底 */
+  --hot:#C9823F;           /* 热度橙色 */
+  --hot-soft:#F7E6CE;      /* 热度浅底 */
+  --danger:#C2574F;        /* 删除红 */
+  --radius:14px;
+  --shadow:0 2px 8px rgba(110,85,60,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  overflow:hidden;
+  box-sizing:border-box;
+  /* iOS 安全区域适配：防止内容被刘海或底部黑条遮挡 */
+  padding-top:env(safe-area-inset-top);
+  padding-right:env(safe-area-inset-right);
+  padding-bottom:env(safe-area-inset-bottom);
+  padding-left:env(safe-area-inset-left);
+  -webkit-tap-highlight-color:transparent;
+}
+/* 触摸事件优化：消除 iOS 点击 300ms 延迟 */
+button,input,select,textarea,label{
+  font-family:inherit;
+  touch-action:manipulation;
+  font-size:16px;   /* ≥16px，防止 iOS 聚焦自动缩放 */
+  color:var(--ink);
+}
+button{cursor:pointer;background:none;border:none}
+input,select,textarea{outline:none}
+
+/* ========== 左右分栏骨架 ========== */
+.app{display:flex;height:100%;max-width:1024px;margin:0 auto}
+
+/* ---- 左侧：栏目导航（约 200px） ---- */
+.sidebar{
+  width:200px;flex:0 0 200px;
+  background:var(--bg3);
+  border-right:1px solid var(--rule);
+  display:flex;flex-direction:column;
+  padding:12px 10px;
+}
+.brand{padding:10px 4px 14px;text-align:center;border-bottom:1px dashed var(--rule);margin-bottom:10px}
+.brand-logo{font-size:32px;line-height:1}
+.brand-title{font-size:17px;font-weight:800;margin-top:6px}
+.brand-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.nav{display:flex;flex-direction:column;gap:6px;flex:1}
+.nav-item{
+  display:flex;align-items:center;gap:8px;
+  width:100%;min-height:48px;             /* ≥44px 点击热区 */
+  padding:6px 10px;border-radius:12px;
+  color:var(--ink);font-size:14px;font-weight:600;text-align:left;
+}
+.nav-item:active{background:var(--accent-soft)}
+.nav-item.active{background:var(--accent);color:#fff}
+.nav-ico{font-size:18px}
+.side-foot{padding:8px 2px 2px;font-size:10px;color:var(--muted);text-align:center;line-height:1.6}
+
+/* ---- 右侧：内容展示区 ---- */
+.main{
+  flex:1;min-width:0;
+  background:var(--bg);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;   /* iOS 流畅滚动 */
+  overscroll-behavior:none;
+}
+.panel{display:none;padding:14px 12px 30px}
+.panel.active{display:block}
+.panel-head{margin-bottom:12px}
+.panel-title-wrap{display:flex;align-items:center;gap:8px}
+.panel-title{font-size:20px;font-weight:800}
+.count{
+  font-size:11px;color:var(--muted);font-weight:600;
+  background:var(--bg2);border:1px solid var(--rule);
+  border-radius:999px;padding:2px 8px;
+}
+.panel-sub{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* ---- 通用列表与卡片 ---- */
+.list{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);box-shadow:var(--shadow)}
+.empty{text-align:center;color:var(--muted);font-size:13px;padding:26px 10px;background:var(--bg2);border:1px dashed var(--rule);border-radius:var(--radius)}
+
+/* ---- 通用删除按钮（≥44x44 热区） ---- */
+.btn-del{
+  flex:0 0 44px;width:44px;height:44px;
+  border-radius:50%;color:var(--muted);font-size:16px;line-height:1;
+}
+.btn-del:active{background:var(--accent-soft);color:var(--danger)}
+
+/* ---- 通用添加按钮 ---- */
+.btn-add{
+  min-width:76px;height:46px;padding:0 16px;
+  background:var(--accent);color:#fff;
+  border-radius:12px;font-size:15px;font-weight:700;
+}
+.btn-add:active{transform:scale(.96);background:#9A6154}
+
+/* ========== 每日计划 ========== */
+.task-row{display:flex;align-items:center;gap:4px;padding:0 4px 0 8px}
+/* label 包裹 checkbox，扩大点击热区（≥44x44） */
+.task-check{
+  display:flex;align-items:center;gap:10px;
+  flex:1;min-width:0;min-height:44px;padding:6px 0;cursor:pointer;
+}
+.task-checkbox{position:absolute;opacity:0;width:1px;height:1px}
+.box{
+  flex:0 0 22px;width:22px;height:22px;
+  border:2px solid var(--accent);border-radius:7px;
+  background:var(--bg2);position:relative;transition:background .15s;
+}
+.task-checkbox:checked ~ .box{background:var(--accent);border-color:var(--accent)}
+.task-checkbox:checked ~ .box::after{
+  content:"";position:absolute;left:6px;top:2px;
+  width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);
+}
+.task-checkbox:focus ~ .box{outline:2px solid var(--accent);outline-offset:2px}
+.task-text{flex:1;min-width:0;font-size:15px;line-height:1.45;word-break:break-word}
+.task-checkbox:checked ~ .task-text{color:var(--muted);text-decoration:line-through}
+
+/* ---- 底部新增任务条 ---- */
+.add-bar{
+  display:flex;gap:8px;align-items:stretch;
+  position:sticky;bottom:0;z-index:5;
+  background:var(--bg);padding-top:10px;
+  box-shadow:0 -4px 12px rgba(110,85,60,.05);
+}
+.add-bar input{
+  flex:1;min-width:0;height:46px;
+  border:1px solid var(--rule);border-radius:12px;
+  padding:0 12px;background:var(--bg2);
+}
+.add-bar input:focus{border-color:var(--accent)}
+
+/* ========== 选题灵感 ========== */
+.idea-item{display:flex;align-items:center;gap:8px;padding:0 4px 0 12px}
+.idea-dot{flex:0 0 8px;width:8px;height:8px;border-radius:50%;background:var(--accent2)}
+.idea-text{flex:1;min-width:0;font-size:15px;line-height:1.45;padding:12px 0;word-break:break-word}
+
+/* ========== 爆款热点/二创 ========== */
+.spot-card{background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow)}
+.spot-head{display:flex;align-items:flex-start;gap:4px}
+.spot-main{flex:1;min-width:0}
+.spot-title{font-size:15px;font-weight:700;line-height:1.4;word-break:break-word}
+.spot-meta{margin-top:7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.heat{color:var(--hot);font-size:13px;letter-spacing:1px;font-weight:600}
+.tag-blogger{background:var(--accent2-soft);color:#59684F;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:600}
+.tag-hot{background:var(--hot-soft);color:#A86B1F;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:600}
+.spot-idea{
+  width:100%;margin-top:10px;min-height:44px;
+  border:1px dashed var(--rule);border-radius:10px;
+  padding:8px 10px;background:var(--bg);
+  font-size:14px;line-height:1.45;resize:vertical;color:var(--ink);
+}
+.spot-idea::placeholder{color:#B5AB9D}
+.spot-idea:focus{border-color:var(--accent);border-style:solid}
+
+/* ========== 内容复盘 ========== */
+.review-card{background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow)}
+.review-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.review-date{
+  font-size:12px;font-weight:600;color:#8C6053;
+  background:var(--accent-soft);border-radius:999px;padding:4px 10px;
+}
+.review-title{font-size:15px;font-weight:700;margin-top:8px;line-height:1.4;word-break:break-word}
+.review-stats{margin-top:9px;display:flex;gap:8px}
+.stat{flex:1;min-width:0;background:var(--bg);border-radius:10px;padding:8px 10px}
+.stat b{display:block;font-size:15px;font-weight:800}
+.stat span{font-size:10px;color:var(--muted)}
+.stat.play b{color:var(--accent)}
+.stat.inter b{color:var(--accent2)}
+.review-advice{
+  margin-top:9px;font-size:13px;color:var(--muted);line-height:1.55;
+  background:var(--accent2-soft);border-radius:10px;padding:8px 10px;
+}
+
+/* ========== 多字段新增表单 ========== */
+.add-card{
+  background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);
+  padding:12px;display:flex;flex-direction:column;gap:10px;
+  margin-top:12px;box-shadow:var(--shadow);
+}
+.add-card input,.add-card select,.add-card textarea{
+  width:100%;height:46px;
+  border:1px solid var(--rule);border-radius:10px;
+  padding:0 12px;background:var(--bg);
+}
+.add-card textarea{height:auto;min-height:54px;padding:10px 12px;resize:vertical;line-height:1.45}
+.add-card input:focus,.add-card select:focus,.add-card textarea:focus{border-color:var(--accent)}
+.add-card .btn-add{width:100%}
+.add-row{display:flex;gap:8px}
+.add-row>*{flex:1;min-width:0}
+.fld{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.fld-label{font-size:11px;color:var(--muted);font-weight:600}
+
+/* ========== iPhone 窄屏自适应（侧栏宽度微调） ========== */
+@media (max-width:420px){
+  .sidebar{width:168px;flex-basis:168px}
+  .panel{padding:12px 10px 26px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ==== 左侧：栏目导航 ==== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">🛍️</div>
+      <div class="brand-title">好物工作台</div>
+      <div class="brand-sub">博主专属创作工具</div>
+    </div>
+    <nav class="nav" id="nav" aria-label="栏目导航">
+      <button class="nav-item active" type="button" data-panel="panel-plan"><span class="nav-ico">📅</span><span>每日计划</span></button>
+      <button class="nav-item" type="button" data-panel="panel-idea"><span class="nav-ico">💡</span><span>选题灵感</span></button>
+      <button class="nav-item" type="button" data-panel="panel-hot"><span class="nav-ico">🔥</span><span>爆款热点/二创</span></button>
+      <button class="nav-item" type="button" data-panel="panel-review"><span class="nav-ico">📊</span><span>内容复盘</span></button>
+    </nav>
+    <div class="side-foot">✨ 所有数据自动保存在本机</div>
+  </aside>
+
+  <!-- ==== 右侧：内容展示区 ==== -->
+  <main class="main" id="main">
+
+    <!-- 每日计划 -->
+    <section class="panel active" id="panel-plan">
+      <div class="panel-head">
+        <div class="panel-title-wrap">
+          <div class="panel-title">每日计划</div>
+          <span class="count" id="plan-count">0 条</span>
+        </div>
+        <div class="panel-sub">把今天要做的事，一件件打勾完成</div>
+      </div>
+      <div class="list" id="task-list"></div>
+      <form class="add-bar" id="task-form">
+        <input id="task-input" type="text" placeholder="新增任务…" autocomplete="off">
+        <button type="submit" class="btn-add">添加</button>
+      </form>
+    </section>
+
+    <!-- 选题灵感 -->
+    <section class="panel" id="panel-idea">
+      <div class="panel-head">
+        <div class="panel-title-wrap">
+          <div class="panel-title">选题灵感</div>
+          <span class="count" id="idea-count">0 条</span>
+        </div>
+        <div class="panel-sub">随时记下你的下一个爆款选题</div>
+      </div>
+      <div class="list" id="idea-list"></div>
+      <form class="add-bar" id="idea-form">
+        <input id="idea-input" type="text" placeholder="记一条灵感…" autocomplete="off">
+        <button type="submit" class="btn-add">添加</button>
+      </form>
+    </section>
+
+    <!-- 爆款热点/二创 -->
+    <section class="panel" id="panel-hot">
+      <div class="panel-head">
+        <div class="panel-title-wrap">
+          <div class="panel-title">爆款热点/二创</div>
+          <span class="count" id="spot-count">0 条</span>
+        </div>
+        <div class="panel-sub">盯紧抖音热点，随手记录你的二创改编思路</div>
+      </div>
+      <div class="list" id="spot-list"></div>
+      <form class="add-card" id="spot-form">
+        <div class="fld">
+          <label class="fld-label" for="spot-title">热点标题</label>
+          <input id="spot-title" type="text" placeholder="如：xxx好物突然爆火" autocomplete="off">
+        </div>
+        <div class="add-row">
+          <div class="fld">
+            <label class="fld-label" for="spot-heat">热度指数</label>
+            <select id="spot-heat">
+              <option value="1">🔥</option>
+              <option value="2">🔥🔥</option>
+              <option value="3" selected="">🔥🔥🔥</option>
+              <option value="4">🔥🔥🔥🔥</option>
+              <option value="5">🔥🔥🔥🔥🔥</option>
+            </select>
+          </div>
+          <div class="fld">
+            <label class="fld-label" for="spot-blogger">来源博主</label>
+            <input id="spot-blogger" type="text" placeholder="如：好物测评阿May" autocomplete="off">
+          </div>
+        </div>
+        <button type="submit" class="btn-add">新增热点</button>
+      </form>
+    </section>
+
+    <!-- 内容复盘 -->
+    <section class="panel" id="panel-review">
+      <div class="panel-head">
+        <div class="panel-title-wrap">
+          <div class="panel-title">内容复盘</div>
+          <span class="count" id="review-count">0 条</span>
+        </div>
+        <div class="panel-sub">回顾每次发布，总结数据与优化经验</div>
+      </div>
+      <div class="list" id="review-list"></div>
+      <form class="add-card" id="review-form">
+        <div class="fld">
+          <label class="fld-label" for="review-date">发布日期</label>
+          <input id="review-date" type="date">
+        </div>
+        <div class="fld">
+          <label class="fld-label" for="review-title">内容标题</label>
+          <input id="review-title" type="text" placeholder="如：平价护肤好物合集" autocomplete="off">
+        </div>
+        <div class="add-row">
+          <div class="fld">
+            <label class="fld-label" for="review-play">播放量</label>
+            <input id="review-play" type="text" inputmode="decimal" placeholder="3.2万">
+          </div>
+          <div class="fld">
+            <label class="fld-label" for="review-inter">互动量</label>
+            <input id="review-inter" type="text" inputmode="numeric" placeholder="1864">
+          </div>
+        </div>
+        <div class="fld">
+          <label class="fld-label" for="review-advice">优化建议</label>
+          <textarea id="review-advice" placeholder="下次发布可以怎么改进？"></textarea>
+        </div>
+        <button type="submit" class="btn-add">新增复盘</button>
+      </form>
+    </section>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ===== 工具函数 ===== */
+  function $(s){ return document.querySelector(s); }
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+  function find(arr,id){ for(var i=0;i<arr.length;i++){ if(arr[i].id===id) return arr[i]; } return null; }
+  function today(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+  function h(tag,attrs,children){
+    var n=document.createElement(tag);
+    if(attrs){
+      Object.keys(attrs).forEach(function(k){
+        if(k==='class'){ n.className=attrs[k]; } else { n.setAttribute(k,attrs[k]); }
+      });
+    }
+    (children||[]).forEach(function(c){
+      if(c==null) return;
+      if(typeof c==='string'||typeof c==='number'){ n.appendChild(document.createTextNode(String(c))); }
+      else { n.appendChild(c); }
+    });
+    return n;
+  }
+
+  /* ===== 数据持久化（所有 localStorage 操作均用 try...catch 包裹） ===== */
+  var KEYS={tasks:'wb_tasks',ideas:'wb_ideas',spots:'wb_spots',reviews:'wb_reviews'};
+
+  var DEFAULTS={
+    tasks:[
+      {id:uid(),text:'筛选今日好物样品',done:false},
+      {id:uid(),text:'拍摄产品图',done:false},
+      {id:uid(),text:'写文案初稿',done:false}
+    ],
+    ideas:[
+      {id:uid(),text:'平价护肤好物合集'},
+      {id:uid(),text:'宿舍好物推荐'},
+      {id:uid(),text:'厨房实用小工具'}
+    ],
+    spots:[
+      {id:uid(),title:'秋冬保温杯爆火：喝水也要有仪式感',heat:4,blogger:'好物测评阿May',idea:''},
+      {id:uid(),title:'平价美白精华平替盘点，成分党狂喜',heat:5,blogger:'成分党小鹿',idea:''},
+      {id:uid(),title:'宿舍神器：懒人遮光床帘',heat:3,blogger:'宿舍好物研究员',idea:''},
+      {id:uid(),title:'厨房收纳小工具封神榜TOP10',heat:4,blogger:'幸福厨房日记',idea:''},
+      {id:uid(),title:'学生党平价蓝牙耳机大测评',heat:5,blogger:'数码种草酱',idea:''},
+      {id:uid(),title:'秋冬润唇膏怎么选？亲测不踩雷',heat:3,blogger:'美妆课代表Kiki',idea:''},
+      {id:uid(),title:'治愈系桌面改造，学习效率翻倍',heat:4,blogger:'收纳控Cindy',idea:''}
+    ],
+    reviews:[
+      {id:uid(),date:'2026-08-24',title:'平价护肤好物合集｜混油皮亲测',play:'3.2万',interact:'1864',advice:'前3秒加入使用前后对比画面，封面放大空瓶特写，提升完播率。'},
+      {id:uid(),date:'2026-08-18',title:'宿舍好物推荐｜人均不过百',play:'1.8万',interact:'902',advice:'标题加入"学生党"关键词，结尾引导关注+收藏，提升互动率。'}
+    ]
+  };
+
+  function load(key){
+    try{
+      var raw=localStorage.getItem(key);
+      if(raw===null) return null;
+      var v=JSON.parse(raw);
+      return Array.isArray(v)?v:null;
+    }catch(e){ return null; }   // 存储不可用（如隐私模式）时回退
+  }
+  function save(key,val){
+    try{ localStorage.setItem(key,JSON.stringify(val)); }
+    catch(e){ /* 存储不可用时静默忽略，不打断页面 */ }
+  }
+  function clone(arr){
+    return arr.map(function(o){ var c={}; for(var k in o) c[k]=o[k]; return c; });
+  }
+
+  var tasks   = load(KEYS.tasks)   || clone(DEFAULTS.tasks);
+  var ideas   = load(KEYS.ideas)   || clone(DEFAULTS.ideas);
+  var spots   = load(KEYS.spots)   || clone(DEFAULTS.spots);
+  var reviews = load(KEYS.reviews) || clone(DEFAULTS.reviews);
+
+  /* ===== 渲染：每日计划 ===== */
+  function renderTasks(){
+    var box=$('#task-list'); box.innerHTML='';
+    $('#plan-count').textContent=tasks.length+' 条';
+    if(!tasks.length){ box.appendChild(h('div',{class:'empty'},['还没有任务，来添加第一条吧 ✨'])); return; }
+    tasks.forEach(function(t){
+      var cb=h('input',{type:'checkbox',class:'task-checkbox','data-id':t.id});
+      cb.checked=!!t.done;
+      var label=h('label',{class:'task-check'},[cb,h('span',{class:'box'}),h('span',{class:'task-text'},[t.text])]);
+      var del=h('button',{class:'btn-del','data-id':t.id,type:'button','aria-label':'删除任务'},['✕']);
+      box.appendChild(h('div',{class:'card task-row'},[label,del]));
+    });
+  }
+
+  /* ===== 渲染：选题灵感 ===== */
+  function renderIdeas(){
+    var box=$('#idea-list'); box.innerHTML='';
+    $('#idea-count').textContent=ideas.length+' 条';
+    if(!ideas.length){ box.appendChild(h('div',{class:'empty'},['还没有灵感，想到就记下来吧 ✨'])); return; }
+    ideas.forEach(function(i){
+      var del=h('button',{class:'btn-del','data-id':i.id,type:'button','aria-label':'删除灵感'},['✕']);
+      box.appendChild(h('div',{class:'card idea-item'},[
+        h('span',{class:'idea-dot'}),
+        h('span',{class:'idea-text'},[i.text]),
+        del
+      ]));
+    });
+  }
+
+  /* ===== 渲染：爆款热点/二创 ===== */
+  function renderSpots(){
+    var box=$('#spot-list'); box.innerHTML='';
+    $('#spot-count').textContent=spots.length+' 条';
+    if(!spots.length){ box.appendChild(h('div',{class:'empty'},['还没有热点，手动新增一条吧 ✨'])); return; }
+    spots.forEach(function(s){
+      var heat=Math.max(1,Math.min(5,+s.heat||1));
+      var meta=h('div',{class:'spot-meta'},[
+        h('span',{class:'heat'},['🔥'.repeat(heat)+' 热度']),
+        h('span',{class:'tag-blogger'},['来自 '+(s.blogger||'未知博主')])
+      ]);
+      if(heat>=5) meta.appendChild(h('span',{class:'tag-hot'},['🔥 爆款']));
+      var ta=h('textarea',{class:'spot-idea','data-id':s.id,placeholder:'把热点改造成你的内容，在这里记录二创思路…'});
+      ta.value=s.idea||'';
+      box.appendChild(h('div',{class:'spot-card'},[
+        h('div',{class:'spot-head'},[
+          h('div',{class:'spot-main'},[
+            h('div',{class:'spot-title'},[s.title]),
+            meta
+          ]),
+          h('button',{class:'btn-del','data-id':s.id,type:'button','aria-label':'删除热点'},['✕'])
+        ]),
+        ta
+      ]));
+    });
+  }
+
+  /* ===== 渲染：内容复盘（按日期倒序） ===== */
+  function renderReviews(){
+    var box=$('#review-list'); box.innerHTML='';
+    $('#review-count').textContent=reviews.length+' 条';
+    if(!reviews.length){ box.appendChild(h('div',{class:'empty'},['还没有复盘记录，发布后记得来总结 ✨'])); return; }
+    var sorted=reviews.slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); });
+    sorted.forEach(function(r){
+      box.appendChild(h('div',{class:'review-card'},[
+        h('div',{class:'review-top'},[
+          h('span',{class:'review-date'},[r.date||'—']),
+          h('button',{class:'btn-del','data-id':r.id,type:'button','aria-label':'删除复盘'},['✕'])
+        ]),
+        h('div',{class:'review-title'},[r.title||'未命名内容']),
+        h('div',{class:'review-stats'},[
+          h('div',{class:'stat play'},[h('b',{},[r.play||'—']),h('span',{},['播放量'])]),
+          h('div',{class:'stat inter'},[h('b',{},[r.interact||'—']),h('span',{},['互动量'])])
+        ]),
+        h('div',{class:'review-advice'},['💡 优化建议：'+(r.advice||'—')])
+      ]));
+    });
+  }
+
+  /* ===== 事件：栏目切换 ===== */
+  $('#nav').addEventListener('click',function(e){
+    var item=e.target.closest('.nav-item');
+    if(!item||item.classList.contains('active')) return;
+    var els=document.querySelectorAll('.nav-item');
+    for(var i=0;i<els.length;i++) els[i].classList.remove('active');
+    item.classList.add('active');
+    var panels=document.querySelectorAll('.panel');
+    for(var j=0;j<panels.length;j++) panels[j].classList.toggle('active',panels[j].id===item.dataset.panel);
+    $('#main').scrollTop=0;
+  });
+
+  /* ===== 事件：任务（打勾 / 删除） ===== */
+  $('#task-list').addEventListener('change',function(e){
+    var cb=e.target.closest('.task-checkbox');
+    if(!cb) return;
+    var t=find(tasks,cb.dataset.id);
+    if(t){ t.done=cb.checked; save(KEYS.tasks,tasks); renderTasks(); }
+  });
+  $('#task-list').addEventListener('click',function(e){
+    var del=e.target.closest('.btn-del');
+    if(!del) return;
+    tasks=tasks.filter(function(t){ return t.id!==del.dataset.id; });
+    save(KEYS.tasks,tasks); renderTasks();
+  });
+  $('#task-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var inp=$('#task-input'), v=inp.value.trim();
+    if(!v){ inp.focus(); return; }
+    tasks.unshift({id:uid(),text:v,done:false});
+    save(KEYS.tasks,tasks); renderTasks();
+    inp.value=''; inp.focus();
+  });
+
+  /* ===== 事件：灵感（新增 / 删除） ===== */
+  $('#idea-list').addEventListener('click',function(e){
+    var del=e.target.closest('.btn-del');
+    if(!del) return;
+    ideas=ideas.filter(function(i){ return i.id!==del.dataset.id; });
+    save(KEYS.ideas,ideas); renderIdeas();
+  });
+  $('#idea-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var inp=$('#idea-input'), v=inp.value.trim();
+    if(!v){ inp.focus(); return; }
+    ideas.unshift({id:uid(),text:v});
+    save(KEYS.ideas,ideas); renderIdeas();
+    inp.value=''; inp.focus();
+  });
+
+  /* ===== 事件：热点（新增 / 删除 / 二创思路自动保存） ===== */
+  $('#spot-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var title=$('#spot-title').value.trim();
+    var blogger=$('#spot-blogger').value.trim();
+    var heat=+$('#spot-heat').value||1;
+    if(!title){ $('#spot-title').focus(); return; }
+    spots.unshift({id:uid(),title:title,heat:heat,blogger:blogger||'未知博主',idea:''});
+    save(KEYS.spots,spots); renderSpots();
+    $('#spot-title').value=''; $('#spot-blogger').value='';
+    $('#spot-title').focus();
+  });
+  $('#spot-list').addEventListener('click',function(e){
+    var del=e.target.closest('.btn-del');
+    if(!del) return;
+    spots=spots.filter(function(s){ return s.id!==del.dataset.id; });
+    save(KEYS.spots,spots); renderSpots();
+  });
+  $('#spot-list').addEventListener('input',function(e){
+    var ta=e.target.closest('.spot-idea');
+    if(!ta) return;
+    var s=find(spots,ta.dataset.id);
+    if(s){ s.idea=ta.value; save(KEYS.spots,spots); }   // 边写边存
+  });
+
+  /* ===== 事件：复盘（新增 / 删除） ===== */
+  $('#review-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var date=$('#review-date').value||today();
+    var title=$('#review-title').value.trim();
+    if(!title){ $('#review-title').focus(); return; }
+    var play=$('#review-play').value.trim();
+    var inter=$('#review-inter').value.trim();
+    var advice=$('#review-advice').value.trim();
+    reviews.unshift({id:uid(),date:date,title:title,play:play||'—',interact:inter||'—',advice:advice||'暂无建议'});
+    save(KEYS.reviews,reviews); renderReviews();
+    $('#review-title').value=''; $('#review-play').value=''; $('#review-inter').value=''; $('#review-advice').value='';
+    $('#review-title').focus();
+  });
+  $('#review-list').addEventListener('click',function(e){
+    var del=e.target.closest('.btn-del');
+    if(!del) return;
+    reviews=reviews.filter(function(r){ return r.id!==del.dataset.id; });
+    save(KEYS.reviews,reviews); renderReviews();
+  });
+
+  /* ===== 初始化 ===== */
+  $('#review-date').value=today();
+  renderTasks();
+  renderIdeas();
+  renderSpots();
+  renderReviews();
+})();
+</script>
+
+</body></html>
