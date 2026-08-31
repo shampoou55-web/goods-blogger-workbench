@@ -164,9 +164,20 @@ input,select,textarea{outline:none}
 .add-bar input:focus{border-color:var(--accent)}
 
 /* ========== 选题灵感 ========== */
-.idea-item{display:flex;align-items:center;gap:8px;padding:0 4px 0 12px}
-.idea-dot{flex:0 0 8px;width:8px;height:8px;border-radius:50%;background:var(--accent2)}
-.idea-text{flex:1;min-width:0;font-size:15px;line-height:1.45;padding:12px 0;word-break:break-word}
+.idea-item{display:flex;align-items:flex-start;gap:8px;padding:10px 4px 10px 12px;flex-wrap:wrap}
+.idea-dot{flex:0 0 8px;width:8px;height:8px;border-radius:50%;background:var(--accent2);margin-top:8px}
+.idea-main{flex:1;min-width:0}
+.idea-text{display:block;min-width:0;font-size:15px;line-height:1.45;padding:2px 0 6px;word-break:break-word}
+.idea-images{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:2px}
+.idea-image{display:block;width:100%;height:150px;object-fit:cover;border-radius:10px;border:1px solid var(--rule);background:var(--bg)}
+.idea-actions{display:flex;gap:4px;flex:0 0 auto;align-items:flex-start}
+.idea-img-btn{min-width:44px;height:44px;padding:0 8px;border:1px solid var(--rule);border-radius:10px;background:var(--bg2);font-size:13px;font-weight:700;color:var(--ink)}
+.idea-img-btn:active{background:var(--accent-soft)}
+.idea-form-extra{display:flex;gap:8px;margin-top:8px;align-items:center}
+.idea-photo-btn{height:44px;padding:0 12px;border:1px dashed var(--rule);border-radius:10px;background:var(--bg2);font-size:13px;font-weight:700;color:var(--ink)}
+.idea-photo-btn:active{background:var(--accent-soft)}
+.idea-pending{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.idea-pending img{width:58px;height:58px;object-fit:cover;border-radius:8px;border:1px solid var(--rule);flex:0 0 auto}
 
 /* ========== 爆款热点/二创 ========== */
 .spot-card{background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow)}
@@ -284,12 +295,19 @@ input,select,textarea{outline:none}
           <div class="panel-title">选题灵感</div>
           <span class="count" id="idea-count">0 条</span>
         </div>
-        <div class="panel-sub">随时记下你的下一个爆款选题</div>
+        <div class="panel-sub">随时记下你的下一个爆款选题，也可以直接导入图片灵感</div>
       </div>
       <div class="list" id="idea-list"></div>
       <form class="add-bar" id="idea-form">
-        <input id="idea-input" type="text" placeholder="记一条灵感…" autocomplete="off">
+        <div style="flex:1;min-width:0">
+          <input id="idea-input" type="text" placeholder="记一条灵感…" autocomplete="off" style="width:100%">
+          <div class="idea-form-extra">
+            <button type="button" class="idea-photo-btn" id="idea-add-photo">📷 导入图片</button>
+            <div class="idea-pending" id="idea-pending"></div>
+          </div>
+        </div>
         <button type="submit" class="btn-add">添加</button>
+        <input id="idea-image-input" type="file" accept="image/*" multiple hidden>
       </form>
     </section>
 
@@ -456,6 +474,68 @@ input,select,textarea{outline:none}
     });
   }
 
+  var pendingIdeaImages=[];
+  var targetIdeaId=null;
+
+  function compressImage(file,done){
+    if(!file || !file.type || file.type.indexOf('image/')!==0){ done(null); return; }
+    var reader=new FileReader();
+    reader.onload=function(){
+      var img=new Image();
+      img.onload=function(){
+        try{
+          var maxSide=1600, scale=Math.min(1,maxSide/Math.max(img.width,img.height));
+          var w=Math.max(1,Math.round(img.width*scale));
+          var h=Math.max(1,Math.round(img.height*scale));
+          var canvas=document.createElement('canvas');
+          canvas.width=w; canvas.height=h;
+          var ctx=canvas.getContext('2d');
+          ctx.drawImage(img,0,0,w,h);
+          done(canvas.toDataURL('image/jpeg',0.78));
+        }catch(e){ done(reader.result); }
+      };
+      img.onerror=function(){ done(null); };
+      img.src=reader.result;
+    };
+    reader.onerror=function(){ done(null); };
+    reader.readAsDataURL(file);
+  }
+
+  function renderPendingIdeaImages(){
+    var box=$('#idea-pending');
+    box.innerHTML='';
+    pendingIdeaImages.forEach(function(src){
+      var im=h('img',{src:src,alt:'待添加图片'});
+      box.appendChild(im);
+    });
+  }
+
+  function handleIdeaImages(files,mode,id){
+    if(!files || !files.length) return;
+    var arr=Array.prototype.slice.call(files);
+    var results=[];
+    var left=arr.length;
+    arr.forEach(function(file){
+      compressImage(file,function(src){
+        if(src) results.push(src);
+        left--;
+        if(left>0) return;
+        if(mode==='pending'){
+          pendingIdeaImages=pendingIdeaImages.concat(results);
+          renderPendingIdeaImages();
+        }else{
+          var idea=find(ideas,id);
+          if(idea){
+            idea.images=Array.isArray(idea.images)?idea.images:[];
+            idea.images=idea.images.concat(results);
+            save(KEYS.ideas,ideas);
+            renderIdeas();
+          }
+        }
+      });
+    });
+  }
+
   /* ===== 渲染：选题灵感 ===== */
   function renderIdeas(){
     var box=$('#idea-list'); box.innerHTML='';
@@ -463,10 +543,21 @@ input,select,textarea{outline:none}
     if(!ideas.length){ box.appendChild(h('div',{class:'empty'},['还没有灵感，想到就记下来吧 ✨'])); return; }
     ideas.forEach(function(i){
       var del=h('button',{class:'btn-del','data-id':i.id,type:'button','aria-label':'删除灵感'},['✕']);
+      var addImg=h('button',{class:'idea-img-btn','data-add-image-id':i.id,type:'button','aria-label':'添加图片'},['📷']);
+      var main=h('div',{class:'idea-main'},[
+        h('span',{class:'idea-text'},[i.text||'图片灵感']),
+        (function(){
+          var wrap=h('div',{class:'idea-images'});
+          (Array.isArray(i.images)?i.images:[]).forEach(function(src){
+            wrap.appendChild(h('img',{class:'idea-image',src:src,alt:'选题灵感图片',loading:'lazy'}));
+          });
+          return wrap;
+        })()
+      ]);
       box.appendChild(h('div',{class:'card idea-item'},[
         h('span',{class:'idea-dot'}),
-        h('span',{class:'idea-text'},[i.text]),
-        del
+        main,
+        h('div',{class:'idea-actions'},[addImg,del])
       ]));
     });
   }
@@ -554,21 +645,46 @@ input,select,textarea{outline:none}
     inp.value=''; inp.focus();
   });
 
-  /* ===== 事件：灵感（新增 / 删除） ===== */
+  /* ===== 事件：灵感（新增 / 删除 / 图片） ===== */
   $('#idea-list').addEventListener('click',function(e){
     var del=e.target.closest('.btn-del');
-    if(!del) return;
-    ideas=ideas.filter(function(i){ return i.id!==del.dataset.id; });
-    save(KEYS.ideas,ideas); renderIdeas();
+    if(del){
+      ideas=ideas.filter(function(i){ return i.id!==del.dataset.id; });
+      save(KEYS.ideas,ideas); renderIdeas();
+      return;
+    }
+    var add=e.target.closest('[data-add-image-id]');
+    if(add){
+      targetIdeaId=add.dataset.addImageId;
+      $('#idea-image-input').click();
+    }
   });
   $('#idea-form').addEventListener('submit',function(e){
     e.preventDefault();
     var inp=$('#idea-input'), v=inp.value.trim();
-    if(!v){ inp.focus(); return; }
-    ideas.unshift({id:uid(),text:v});
+    if(!v && !pendingIdeaImages.length){ inp.focus(); return; }
+    ideas.unshift({id:uid(),text:v||'图片灵感',images:pendingIdeaImages.slice()});
     save(KEYS.ideas,ideas); renderIdeas();
-    inp.value=''; inp.focus();
+    inp.value='';
+    pendingIdeaImages=[];
+    renderPendingIdeaImages();
+    inp.focus();
   });
+  $('#idea-add-photo').addEventListener('click',function(){
+    targetIdeaId=null;
+    $('#idea-image-input').click();
+  });
+  $('#idea-image-input').addEventListener('change',function(e){
+    var files=e.target.files;
+    if(targetIdeaId){
+      handleIdeaImages(files,'existing',targetIdeaId);
+    }else{
+      handleIdeaImages(files,'pending',null);
+    }
+    targetIdeaId=null;
+    e.target.value='';
+  });
+
 
   /* ===== 事件：热点（新增 / 删除 / 二创思路自动保存） ===== */
   $('#spot-form').addEventListener('submit',function(e){
@@ -622,7 +738,7 @@ input,select,textarea{outline:none}
     try{
       var backup={
         app:'goods-blogger-workbench',
-        version:1,
+        version:2,
         exportedAt:new Date().toISOString(),
         tasks:tasks,
         ideas:ideas,
@@ -651,13 +767,13 @@ input,select,textarea{outline:none}
     reader.onload=function(){
       try{
         var data=JSON.parse(reader.result);
-        if(!data || data.app!=='goods-blogger-workbench' || data.version!==1 ||
+        if(!data || data.app!=='goods-blogger-workbench' || (data.version!==1 && data.version!==2) ||
            !validArray(data.tasks)||!validArray(data.ideas)||!validArray(data.spots)||!validArray(data.reviews)){
           throw new Error('invalid backup');
         }
         if(!confirm('导入后会覆盖当前的任务、灵感、热点和复盘数据。确定继续吗？')) return;
         tasks=data.tasks;
-        ideas=data.ideas;
+        ideas=data.ideas.map(function(i){ i.images=Array.isArray(i.images)?i.images:[]; return i; });
         spots=data.spots;
         reviews=data.reviews;
         save(KEYS.tasks,tasks);
