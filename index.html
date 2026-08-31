@@ -118,6 +118,15 @@ input,select,textarea{outline:none}
 }
 .btn-add:active{transform:scale(.96);background:#9A6154}
 
+
+/* ========== 数据备份 ========== */
+.backup-box{padding:8px 2px 6px;border-top:1px dashed var(--rule);margin-top:8px}
+.backup-title{font-size:11px;color:var(--muted);font-weight:700;text-align:center;margin-bottom:6px}
+.backup-actions{display:flex;gap:6px}
+.backup-btn{flex:1;min-height:40px;padding:0 6px;border:1px solid var(--rule);border-radius:10px;background:var(--bg2);font-size:11px;font-weight:700;color:var(--ink)}
+.backup-btn:active{background:var(--accent-soft)}
+.backup-note{margin-top:5px;font-size:9px;line-height:1.4;color:var(--muted);text-align:center}
+
 /* ========== 每日计划 ========== */
 .task-row{display:flex;align-items:center;gap:4px;padding:0 4px 0 8px}
 /* label 包裹 checkbox，扩大点击热区（≥44x44） */
@@ -237,6 +246,15 @@ input,select,textarea{outline:none}
       <button class="nav-item" type="button" data-panel="panel-hot"><span class="nav-ico">🔥</span><span>爆款热点/二创</span></button>
       <button class="nav-item" type="button" data-panel="panel-review"><span class="nav-ico">📊</span><span>内容复盘</span></button>
     </nav>
+    <div class="backup-box">
+      <div class="backup-title">数据备份</div>
+      <div class="backup-actions">
+        <button type="button" class="backup-btn" id="export-data">⬇️ 导出</button>
+        <button type="button" class="backup-btn" id="import-data">⬆️ 导入</button>
+      </div>
+      <div class="backup-note">换手机前先导出，导入会覆盖当前数据</div>
+      <input id="import-file" type="file" accept="application/json,.json" hidden>
+    </div>
     <div class="side-foot">✨ 所有数据自动保存在本机</div>
   </aside>
 
@@ -596,6 +614,74 @@ input,select,textarea{outline:none}
     if(!del) return;
     reviews=reviews.filter(function(r){ return r.id!==del.dataset.id; });
     save(KEYS.reviews,reviews); renderReviews();
+  });
+
+
+  /* ===== 事件：数据导入 / 导出 ===== */
+  function exportData(){
+    try{
+      var backup={
+        app:'goods-blogger-workbench',
+        version:1,
+        exportedAt:new Date().toISOString(),
+        tasks:tasks,
+        ideas:ideas,
+        spots:spots,
+        reviews:reviews
+      };
+      var blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json;charset=utf-8'});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url;
+      a.download='好物工作台-备份-'+today()+'.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function(){URL.revokeObjectURL(url);},1000);
+    }catch(e){
+      alert('导出失败，请检查浏览器是否允许下载文件。');
+    }
+  }
+
+  function validArray(v){ return Array.isArray(v); }
+
+  function importData(file){
+    if(!file) return;
+    var reader=new FileReader();
+    reader.onload=function(){
+      try{
+        var data=JSON.parse(reader.result);
+        if(!data || data.app!=='goods-blogger-workbench' || data.version!==1 ||
+           !validArray(data.tasks)||!validArray(data.ideas)||!validArray(data.spots)||!validArray(data.reviews)){
+          throw new Error('invalid backup');
+        }
+        if(!confirm('导入后会覆盖当前的任务、灵感、热点和复盘数据。确定继续吗？')) return;
+        tasks=data.tasks;
+        ideas=data.ideas;
+        spots=data.spots;
+        reviews=data.reviews;
+        save(KEYS.tasks,tasks);
+        save(KEYS.ideas,ideas);
+        save(KEYS.spots,spots);
+        save(KEYS.reviews,reviews);
+        renderTasks();
+        renderIdeas();
+        renderSpots();
+        renderReviews();
+        alert('导入成功！');
+      }catch(e){
+        alert('导入失败：请选择本工作台导出的 JSON 备份文件。');
+      }
+    };
+    reader.onerror=function(){ alert('读取文件失败，请重试。'); };
+    reader.readAsText(file,'utf-8');
+  }
+
+  $('#export-data').addEventListener('click',exportData);
+  $('#import-data').addEventListener('click',function(){ $('#import-file').click(); });
+  $('#import-file').addEventListener('change',function(e){
+    importData(e.target.files && e.target.files[0]);
+    e.target.value='';
   });
 
   /* ===== 初始化 ===== */
