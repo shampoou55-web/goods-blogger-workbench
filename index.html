@@ -190,7 +190,7 @@ input,select,textarea{outline:none}
 .spot-head{display:flex;align-items:flex-start;gap:4px}
 .spot-main{flex:1;min-width:0}
 .spot-title{font-size:15px;font-weight:700;line-height:1.4;word-break:break-word}
-.spot-meta{margin-top:9px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.spot-meta{margin-top:9px;display:flex;flex-direction:column;gap:7px}
 .money-box{background:var(--bg);border-radius:10px;padding:8px 9px;min-width:0}
 .money-box b{display:block;font-size:15px;font-weight:800;word-break:break-word}
 .money-box span{display:block;font-size:10px;color:var(--muted);margin-top:2px}
@@ -237,10 +237,11 @@ input,select,textarea{outline:none}
 @media (max-width:420px){
   .sidebar{width:150px;flex-basis:150px}
   .panel{padding:12px 10px 26px}
-  .spot-meta{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
-  .money-box{padding:7px 8px}
-  .money-box b{font-size:14px;white-space:nowrap;word-break:normal;overflow:hidden;text-overflow:ellipsis}
-  .money-box span{font-size:10px;white-space:nowrap}
+  /* 手机端合作金额不再使用三列，避免金额字符被挤成竖排 */
+  .spot-meta{display:flex;flex-direction:column;gap:6px;width:100%}
+  .money-box{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;width:100%}
+  .money-box b{display:block;font-size:14px;white-space:nowrap;word-break:normal;overflow:visible;text-overflow:clip;text-align:right;flex:0 0 auto}
+  .money-box span{display:block;font-size:10px;white-space:nowrap;flex:1;min-width:0}
   .spot-card{padding:10px}
   .add-row{gap:6px}
 }
@@ -252,6 +253,10 @@ input,select,textarea{outline:none}
   .panel-title{font-size:19px}
   .add-card{padding:10px;gap:8px}
   .add-card input,.add-card select,.add-card textarea{padding-left:10px;padding-right:10px}
+  /* 21:9 竖屏进一步锁定为单列金额卡 */
+  .spot-meta{display:flex !important;flex-direction:column !important;width:100% !important}
+  .money-box{width:100% !important;display:flex !important;align-items:center !important;justify-content:space-between !important}
+  .money-box b{white-space:nowrap !important;word-break:normal !important}
 }
 </style>
 </head>
@@ -339,15 +344,13 @@ input,select,textarea{outline:none}
           <label class="fld-label" for="spot-title">品牌名</label>
           <input id="spot-title" type="text" placeholder="如：某某品牌" autocomplete="off">
         </div>
-        <div class="add-row">
-          <div class="fld">
-            <label class="fld-label" for="spot-advance">垫付金额</label>
-            <input id="spot-advance" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0">
-          </div>
-          <div class="fld">
-            <label class="fld-label" for="spot-income">收益金额</label>
-            <input id="spot-income" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0">
-          </div>
+        <div class="fld">
+          <label class="fld-label" for="spot-advance">垫付金额</label>
+          <input id="spot-advance" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0">
+        </div>
+        <div class="fld">
+          <label class="fld-label" for="spot-income">收益金额</label>
+          <input id="spot-income" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0">
         </div>
         <div class="fld">
           <label class="fld-label" for="spot-deadline">要求作品发布时间</label>
