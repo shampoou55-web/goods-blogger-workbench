@@ -195,6 +195,7 @@ input,select,textarea{outline:none}
 .money-box b{display:block;font-size:15px;font-weight:800;word-break:break-word}
 .money-box span{display:block;font-size:10px;color:var(--muted);margin-top:2px}
 .coop-date{margin-top:9px;font-size:11px;color:#8C6053;background:var(--accent-soft);border-radius:999px;padding:4px 9px;display:inline-block}
+.coop-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}.coop-summary-card{background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);padding:10px;box-shadow:var(--shadow);min-width:0}.coop-summary-card span{display:block;font-size:10px;color:var(--muted);margin-bottom:4px}.coop-summary-card b{display:block;font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.coop-summary-card.net b{color:var(--accent2)}
 /* ========== 内容复盘 ========== */
 .review-card{background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow)}
 .review-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -244,6 +245,7 @@ input,select,textarea{outline:none}
   .money-box span{display:block;font-size:10px;white-space:nowrap;flex:1;min-width:0}
   .spot-card{padding:10px}
   .add-row{gap:6px}
+  .coop-summary{grid-template-columns:1fr}
 }
 
 /* 21:9 手机竖屏：为超窄内容区进一步压缩导航和卡片，避免金额/字段被挤成竖排 */
@@ -338,6 +340,7 @@ input,select,textarea{outline:none}
         </div>
         <div class="panel-sub">记录品牌合作、垫付金额、收益金额和要求作品发布时间</div>
       </div>
+      <div class="coop-summary" id="coop-summary"></div>
       <div class="list" id="spot-list"></div>
       <form class="add-card" id="spot-form">
         <div class="fld">
@@ -574,20 +577,33 @@ input,select,textarea{outline:none}
     var n=Number(v||0);
     return '¥'+n.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
   }
+  function renderCoopSummary(){
+    var box=$('#coop-summary');
+    if(!box) return;
+    var totalIncome=0;
+    spots.forEach(function(s){
+      totalIncome+=Number(s.income||0);
+    });
+    box.innerHTML='';
+    box.appendChild(h('div',{class:'coop-summary-card'},[
+      h('span',{},['总收益金额']),
+      h('b',{},[formatMoney(totalIncome)])
+    ]));
+  }
   function renderSpots(){
     var box=$('#spot-list'); box.innerHTML='';
     $('#spot-count').textContent=spots.length+' 条';
+    renderCoopSummary();
     if(!spots.length){ box.appendChild(h('div',{class:'empty'},['还没有合作记录，先新增一笔吧 ✨'])); return; }
     spots.forEach(function(s){
-      var advance=Number(s.advance||0), income=Number(s.income||0), profit=income-advance;
+      var advance=Number(s.advance||0), income=Number(s.income||0);
       box.appendChild(h('div',{class:'spot-card'},[
         h('div',{class:'spot-head'},[
           h('div',{class:'spot-main'},[
             h('div',{class:'spot-title'},[s.title||'未命名品牌']),
             h('div',{class:'spot-meta'},[
               h('div',{class:'money-box'},[h('b',{},[formatMoney(advance)]),h('span',{},['垫付金额'])]),
-              h('div',{class:'money-box'},[h('b',{},[formatMoney(income)]),h('span',{},['收益金额'])]),
-              h('div',{class:'money-box'},[h('b',{},[formatMoney(profit)]),h('span',{},['净收益'])])
+              h('div',{class:'money-box'},[h('b',{},[formatMoney(income)]),h('span',{},['收益金额'])])
             ]),
             h('div',{class:'coop-date'},['要求发布时间：'+(s.deadline||'未填写')])
           ]),
