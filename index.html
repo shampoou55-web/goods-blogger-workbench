@@ -195,7 +195,7 @@ input,select,textarea{outline:none}
 .money-box b{display:block;font-size:15px;font-weight:800;word-break:break-word}
 .money-box span{display:block;font-size:10px;color:var(--muted);margin-top:2px}
 .coop-date{margin-top:9px;font-size:11px;color:#8C6053;background:var(--accent-soft);border-radius:999px;padding:4px 9px;display:inline-block}
-.coop-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}.coop-summary-card{background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);padding:10px;box-shadow:var(--shadow);min-width:0}.coop-summary-card span{display:block;font-size:10px;color:var(--muted);margin-bottom:4px}.coop-summary-card b{display:block;font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.coop-summary-card.net b{color:var(--accent2)}
+.coop-summary{display:block;width:100%;margin-bottom:12px}.coop-summary-card{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:68px;background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow)}.coop-summary-card span{display:block;font-size:13px;color:var(--muted);font-weight:700;white-space:nowrap}.coop-summary-card b{display:block;font-size:24px;line-height:1.1;font-weight:900;white-space:nowrap;word-break:normal;overflow:visible;text-overflow:clip;text-align:right}.coop-summary-card.net b{color:var(--accent2)}
 /* ========== 内容复盘 ========== */
 .review-card{background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow)}
 .review-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -245,7 +245,10 @@ input,select,textarea{outline:none}
   .money-box span{display:block;font-size:10px;white-space:nowrap;flex:1;min-width:0}
   .spot-card{padding:10px}
   .add-row{gap:6px}
-  .coop-summary{grid-template-columns:1fr}
+  .coop-summary{display:block;width:100%;margin-bottom:12px}
+  .coop-summary-card{min-height:64px;padding:11px 12px;border-radius:12px}
+  .coop-summary-card span{font-size:12px}
+  .coop-summary-card b{font-size:22px;flex:0 0 auto}
 }
 
 /* 21:9 手机竖屏：为超窄内容区进一步压缩导航和卡片，避免金额/字段被挤成竖排 */
