@@ -146,7 +146,13 @@ input,select,textarea{outline:none}
   width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);
 }
 .task-checkbox:focus ~ .box{outline:2px solid var(--accent);outline-offset:2px}
-.task-text{flex:1;min-width:0;font-size:15px;line-height:1.45;word-break:break-word}
+ .task-text{flex:1;min-width:0;font-size:15px;line-height:1.45;word-break:break-word}
+.task-row{cursor:grab;-webkit-user-select:none;user-select:none;position:relative}
+.task-row.dragging{opacity:.55;transform:scale(.99)}
+.task-row.drag-over{border:2px dashed var(--accent);padding-top:0;padding-bottom:0}
+.task-edit{display:none;flex:1;min-width:0;height:40px;border:1px solid var(--rule);border-radius:10px;padding:0 10px;background:var(--bg)}
+.task-row.editing .task-text,.task-row.editing .box{display:none}
+.task-row.editing .task-edit{display:block}
 .task-checkbox:checked ~ .task-text{color:var(--muted);text-decoration:line-through}
 
 /* ---- 底部新增任务条 ---- */
@@ -179,24 +185,16 @@ input,select,textarea{outline:none}
 .idea-pending{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
 .idea-pending img{width:58px;height:58px;object-fit:cover;border-radius:8px;border:1px solid var(--rule);flex:0 0 auto}
 
-/* ========== 爆款热点/二创 ========== */
+/* ========== 合作记账 ========== */
 .spot-card{background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow)}
 .spot-head{display:flex;align-items:flex-start;gap:4px}
 .spot-main{flex:1;min-width:0}
 .spot-title{font-size:15px;font-weight:700;line-height:1.4;word-break:break-word}
-.spot-meta{margin-top:7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.heat{color:var(--hot);font-size:13px;letter-spacing:1px;font-weight:600}
-.tag-blogger{background:var(--accent2-soft);color:#59684F;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:600}
-.tag-hot{background:var(--hot-soft);color:#A86B1F;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:600}
-.spot-idea{
-  width:100%;margin-top:10px;min-height:44px;
-  border:1px dashed var(--rule);border-radius:10px;
-  padding:8px 10px;background:var(--bg);
-  font-size:14px;line-height:1.45;resize:vertical;color:var(--ink);
-}
-.spot-idea::placeholder{color:#B5AB9D}
-.spot-idea:focus{border-color:var(--accent);border-style:solid}
-
+.spot-meta{margin-top:9px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.money-box{background:var(--bg);border-radius:10px;padding:8px 9px;min-width:0}
+.money-box b{display:block;font-size:15px;font-weight:800;word-break:break-word}
+.money-box span{display:block;font-size:10px;color:var(--muted);margin-top:2px}
+.coop-date{margin-top:9px;font-size:11px;color:#8C6053;background:var(--accent-soft);border-radius:999px;padding:4px 9px;display:inline-block}
 /* ========== 内容复盘 ========== */
 .review-card{background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow)}
 .review-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -254,7 +252,7 @@ input,select,textarea{outline:none}
     <nav class="nav" id="nav" aria-label="栏目导航">
       <button class="nav-item active" type="button" data-panel="panel-plan"><span class="nav-ico">📅</span><span>每日计划</span></button>
       <button class="nav-item" type="button" data-panel="panel-idea"><span class="nav-ico">💡</span><span>选题灵感</span></button>
-      <button class="nav-item" type="button" data-panel="panel-hot"><span class="nav-ico">🔥</span><span>爆款热点/二创</span></button>
+      <button class="nav-item" type="button" data-panel="panel-hot"><span class="nav-ico">🔥</span><span>合作记账</span></button>
       <button class="nav-item" type="button" data-panel="panel-review"><span class="nav-ico">📊</span><span>内容复盘</span></button>
     </nav>
     <div class="backup-box">
@@ -279,7 +277,7 @@ input,select,textarea{outline:none}
           <div class="panel-title">每日计划</div>
           <span class="count" id="plan-count">0 条</span>
         </div>
-        <div class="panel-sub">把今天要做的事，一件件打勾完成</div>
+        <div class="panel-sub">把今天要做的事，一件件打勾完成；双击可编辑，长按后拖动排序</div>
       </div>
       <div class="list" id="task-list"></div>
       <form class="add-bar" id="task-form">
@@ -311,38 +309,36 @@ input,select,textarea{outline:none}
       </form>
     </section>
 
-    <!-- 爆款热点/二创 -->
+    <!-- 合作记账 -->
     <section class="panel" id="panel-hot">
       <div class="panel-head">
         <div class="panel-title-wrap">
-          <div class="panel-title">爆款热点/二创</div>
+          <div class="panel-title">合作记账</div>
           <span class="count" id="spot-count">0 条</span>
         </div>
-        <div class="panel-sub">盯紧抖音热点，随手记录你的二创改编思路</div>
+        <div class="panel-sub">记录品牌合作、垫付金额、收益金额和要求作品发布时间</div>
       </div>
       <div class="list" id="spot-list"></div>
       <form class="add-card" id="spot-form">
         <div class="fld">
-          <label class="fld-label" for="spot-title">热点标题</label>
-          <input id="spot-title" type="text" placeholder="如：xxx好物突然爆火" autocomplete="off">
+          <label class="fld-label" for="spot-title">品牌名</label>
+          <input id="spot-title" type="text" placeholder="如：某某品牌" autocomplete="off">
         </div>
         <div class="add-row">
           <div class="fld">
-            <label class="fld-label" for="spot-heat">热度指数</label>
-            <select id="spot-heat">
-              <option value="1">🔥</option>
-              <option value="2">🔥🔥</option>
-              <option value="3" selected="">🔥🔥🔥</option>
-              <option value="4">🔥🔥🔥🔥</option>
-              <option value="5">🔥🔥🔥🔥🔥</option>
-            </select>
+            <label class="fld-label" for="spot-advance">垫付金额</label>
+            <input id="spot-advance" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0">
           </div>
           <div class="fld">
-            <label class="fld-label" for="spot-blogger">来源博主</label>
-            <input id="spot-blogger" type="text" placeholder="如：好物测评阿May" autocomplete="off">
+            <label class="fld-label" for="spot-income">收益金额</label>
+            <input id="spot-income" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0">
           </div>
         </div>
-        <button type="submit" class="btn-add">新增热点</button>
+        <div class="fld">
+          <label class="fld-label" for="spot-deadline">要求作品发布时间</label>
+          <input id="spot-deadline" type="date">
+        </div>
+        <button type="submit" class="btn-add">新增合作</button>
       </form>
     </section>
 
@@ -424,15 +420,7 @@ input,select,textarea{outline:none}
       {id:uid(),text:'宿舍好物推荐'},
       {id:uid(),text:'厨房实用小工具'}
     ],
-    spots:[
-      {id:uid(),title:'秋冬保温杯爆火：喝水也要有仪式感',heat:4,blogger:'好物测评阿May',idea:''},
-      {id:uid(),title:'平价美白精华平替盘点，成分党狂喜',heat:5,blogger:'成分党小鹿',idea:''},
-      {id:uid(),title:'宿舍神器：懒人遮光床帘',heat:3,blogger:'宿舍好物研究员',idea:''},
-      {id:uid(),title:'厨房收纳小工具封神榜TOP10',heat:4,blogger:'幸福厨房日记',idea:''},
-      {id:uid(),title:'学生党平价蓝牙耳机大测评',heat:5,blogger:'数码种草酱',idea:''},
-      {id:uid(),title:'秋冬润唇膏怎么选？亲测不踩雷',heat:3,blogger:'美妆课代表Kiki',idea:''},
-      {id:uid(),title:'治愈系桌面改造，学习效率翻倍',heat:4,blogger:'收纳控Cindy',idea:''}
-    ],
+    spots:[],
     reviews:[
       {id:uid(),date:'2026-08-24',title:'平价护肤好物合集｜混油皮亲测',play:'3.2万',interact:'1864',advice:'前3秒加入使用前后对比画面，封面放大空瓶特写，提升完播率。'},
       {id:uid(),date:'2026-08-18',title:'宿舍好物推荐｜人均不过百',play:'1.8万',interact:'902',advice:'标题加入"学生党"关键词，结尾引导关注+收藏，提升互动率。'}
@@ -468,9 +456,10 @@ input,select,textarea{outline:none}
     tasks.forEach(function(t){
       var cb=h('input',{type:'checkbox',class:'task-checkbox','data-id':t.id});
       cb.checked=!!t.done;
+      var edit=h('input',{class:'task-edit','data-edit-id':t.id,type:'text',value:t.text||'',autocomplete:'off'});
       var label=h('label',{class:'task-check'},[cb,h('span',{class:'box'}),h('span',{class:'task-text'},[t.text])]);
       var del=h('button',{class:'btn-del','data-id':t.id,type:'button','aria-label':'删除任务'},['✕']);
-      box.appendChild(h('div',{class:'card task-row'},[label,del]));
+      box.appendChild(h('div',{class:'card task-row','data-id':t.id,'draggable':'true'},[label,edit,del]));
     });
   }
 
@@ -562,29 +551,30 @@ input,select,textarea{outline:none}
     });
   }
 
-  /* ===== 渲染：爆款热点/二创 ===== */
+  /* ===== 渲染：合作记账 ===== */
+  function formatMoney(v){
+    var n=Number(v||0);
+    return '¥'+n.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
   function renderSpots(){
     var box=$('#spot-list'); box.innerHTML='';
     $('#spot-count').textContent=spots.length+' 条';
-    if(!spots.length){ box.appendChild(h('div',{class:'empty'},['还没有热点，手动新增一条吧 ✨'])); return; }
+    if(!spots.length){ box.appendChild(h('div',{class:'empty'},['还没有合作记录，先新增一笔吧 ✨'])); return; }
     spots.forEach(function(s){
-      var heat=Math.max(1,Math.min(5,+s.heat||1));
-      var meta=h('div',{class:'spot-meta'},[
-        h('span',{class:'heat'},['🔥'.repeat(heat)+' 热度']),
-        h('span',{class:'tag-blogger'},['来自 '+(s.blogger||'未知博主')])
-      ]);
-      if(heat>=5) meta.appendChild(h('span',{class:'tag-hot'},['🔥 爆款']));
-      var ta=h('textarea',{class:'spot-idea','data-id':s.id,placeholder:'把热点改造成你的内容，在这里记录二创思路…'});
-      ta.value=s.idea||'';
+      var advance=Number(s.advance||0), income=Number(s.income||0), profit=income-advance;
       box.appendChild(h('div',{class:'spot-card'},[
         h('div',{class:'spot-head'},[
           h('div',{class:'spot-main'},[
-            h('div',{class:'spot-title'},[s.title]),
-            meta
+            h('div',{class:'spot-title'},[s.title||'未命名品牌']),
+            h('div',{class:'spot-meta'},[
+              h('div',{class:'money-box'},[h('b',{},[formatMoney(advance)]),h('span',{},['垫付金额'])]),
+              h('div',{class:'money-box'},[h('b',{},[formatMoney(income)]),h('span',{},['收益金额'])]),
+              h('div',{class:'money-box'},[h('b',{},[formatMoney(profit)]),h('span',{},['净收益'])])
+            ]),
+            h('div',{class:'coop-date'},['要求发布时间：'+(s.deadline||'未填写')])
           ]),
-          h('button',{class:'btn-del','data-id':s.id,type:'button','aria-label':'删除热点'},['✕'])
-        ]),
-        ta
+          h('button',{class:'btn-del','data-id':s.id,type:'button','aria-label':'删除合作记录'},['✕'])
+        ])
       ]));
     });
   }
@@ -623,7 +613,15 @@ input,select,textarea{outline:none}
     $('#main').scrollTop=0;
   });
 
-  /* ===== 事件：任务（打勾 / 删除） ===== */
+  /* ===== 事件：任务（打勾 / 删除 / 编辑 / 长按排序） ===== */
+  var dragTaskId=null, longPressTimer=null, touchDragging=false, touchLastTarget=null;
+  function commitTaskEdit(input){
+    var t=find(tasks,input.dataset.editId);
+    if(!t) return;
+    var v=input.value.trim();
+    if(v){ t.text=v; save(KEYS.tasks,tasks); }
+    renderTasks();
+  }
   $('#task-list').addEventListener('change',function(e){
     var cb=e.target.closest('.task-checkbox');
     if(!cb) return;
@@ -632,17 +630,77 @@ input,select,textarea{outline:none}
   });
   $('#task-list').addEventListener('click',function(e){
     var del=e.target.closest('.btn-del');
-    if(!del) return;
-    tasks=tasks.filter(function(t){ return t.id!==del.dataset.id; });
-    save(KEYS.tasks,tasks); renderTasks();
+    if(del){ tasks=tasks.filter(function(t){ return t.id!==del.dataset.id; }); save(KEYS.tasks,tasks); renderTasks(); return; }
+    var row=e.target.closest('.task-row');
+    if(row && e.detail>=2 && !e.target.closest('label') && !e.target.closest('.task-edit')){
+      var edit=row.querySelector('.task-edit'); row.classList.add('editing'); edit.focus(); edit.select();
+    }
   });
-  $('#task-form').addEventListener('submit',function(e){
+  $('#task-list').addEventListener('keydown',function(e){
+    var edit=e.target.closest('.task-edit'); if(!edit) return;
+    if(e.key==='Enter') commitTaskEdit(edit);
+    else if(e.key==='Escape') renderTasks();
+  });
+  $('#task-list').addEventListener('blur',function(e){
+    var edit=e.target.closest('.task-edit'); if(edit) commitTaskEdit(edit);
+  },true);
+  $('#task-list').addEventListener('pointerdown',function(e){
+    var row=e.target.closest('.task-row');
+    if(!row || e.target.closest('.btn-del') || e.target.closest('.task-edit') || e.target.closest('label')) return;
+    var sx=e.clientX, sy=e.clientY;
+    longPressTimer=setTimeout(function(){
+      dragTaskId=row.dataset.id; touchDragging=true; touchLastTarget=row; row.classList.add('dragging');
+    },520);
+    row.dataset.sx=sx; row.dataset.sy=sy;
+  });
+  $('#task-list').addEventListener('pointermove',function(e){
+    var row=e.target.closest('.task-row');
+    if(!row) return;
+    if(!touchDragging){
+      var sx=Number(row.dataset.sx||e.clientX), sy=Number(row.dataset.sy||e.clientY);
+      if(Math.abs(e.clientX-sx)>10 || Math.abs(e.clientY-sy)>10){
+        if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}
+      }
+      return;
+    }
     e.preventDefault();
-    var inp=$('#task-input'), v=inp.value.trim();
-    if(!v){ inp.focus(); return; }
-    tasks.unshift({id:uid(),text:v,done:false});
-    save(KEYS.tasks,tasks); renderTasks();
-    inp.value=''; inp.focus();
+    var under=document.elementFromPoint(e.clientX,e.clientY);
+    var target=under && under.closest ? under.closest('.task-row') : null;
+    if(target && target!==touchLastTarget && target.parentNode===$('#task-list')){
+      var from=tasks.findIndex(function(t){return t.id===dragTaskId;}), to=tasks.findIndex(function(t){return t.id===target.dataset.id;});
+      if(from<0||to<0) return;
+      var moved=tasks.splice(from,1)[0];
+      var targetRect=target.getBoundingClientRect();
+      var insertBefore=e.clientY < targetRect.top + targetRect.height/2;
+      var newIndex=to + (from<to ? (insertBefore?0:-1) : (insertBefore?0:1));
+      newIndex=Math.max(0,Math.min(tasks.length,newIndex));
+      tasks.splice(newIndex,0,moved);
+      save(KEYS.tasks,tasks);
+      touchLastTarget=target;
+      renderTasks();
+      var active=document.querySelector('.task-row[data-id="'+dragTaskId+'"]');
+      if(active) active.classList.add('dragging');
+    }
+  },{passive:false});
+  ['pointerup','pointercancel','pointerleave'].forEach(function(evt){
+    $('#task-list').addEventListener(evt,function(){
+      if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}
+      if(touchDragging){
+        touchDragging=false; touchLastTarget=null; save(KEYS.tasks,tasks); renderTasks();
+      }
+    });
+  });
+  $('#task-list').addEventListener('dragstart',function(e){ var row=e.target.closest('.task-row'); if(!row) return; dragTaskId=row.dataset.id; row.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',dragTaskId); });
+  $('#task-list').addEventListener('dragover',function(e){ e.preventDefault(); var row=e.target.closest('.task-row'); if(!row||!dragTaskId||row.dataset.id===dragTaskId) return; document.querySelectorAll('.task-row.drag-over').forEach(function(n){n.classList.remove('drag-over');}); row.classList.add('drag-over'); });
+  $('#task-list').addEventListener('drop',function(e){
+    e.preventDefault(); var target=e.target.closest('.task-row'); if(!target||!dragTaskId||target.dataset.id===dragTaskId) return;
+    var from=tasks.findIndex(function(t){return t.id===dragTaskId;}), to=tasks.findIndex(function(t){return t.id===target.dataset.id;});
+    if(from<0||to<0) return; var moved=tasks.splice(from,1)[0]; tasks.splice(to,0,moved); save(KEYS.tasks,tasks); dragTaskId=null; renderTasks();
+  });
+  $('#task-list').addEventListener('dragend',function(){ dragTaskId=null; if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;} document.querySelectorAll('.task-row').forEach(function(n){n.classList.remove('dragging','drag-over');}); });
+  $('#task-form').addEventListener('submit',function(e){
+    e.preventDefault(); var inp=$('#task-input'), v=inp.value.trim(); if(!v){inp.focus();return;}
+    tasks.push({id:uid(),text:v,done:false}); save(KEYS.tasks,tasks); renderTasks(); inp.value=''; inp.focus();
   });
 
   /* ===== 事件：灵感（新增 / 删除 / 图片） ===== */
@@ -686,29 +744,18 @@ input,select,textarea{outline:none}
   });
 
 
-  /* ===== 事件：热点（新增 / 删除 / 二创思路自动保存） ===== */
+  /* ===== 事件：合作记账（新增 / 删除） ===== */
   $('#spot-form').addEventListener('submit',function(e){
     e.preventDefault();
-    var title=$('#spot-title').value.trim();
-    var blogger=$('#spot-blogger').value.trim();
-    var heat=+$('#spot-heat').value||1;
-    if(!title){ $('#spot-title').focus(); return; }
-    spots.unshift({id:uid(),title:title,heat:heat,blogger:blogger||'未知博主',idea:''});
+    var title=$('#spot-title').value.trim(), advance=$('#spot-advance').value.trim(), income=$('#spot-income').value.trim(), deadline=$('#spot-deadline').value;
+    if(!title){$('#spot-title').focus();return;}
+    spots.unshift({id:uid(),title:title,advance:Number(advance||0),income:Number(income||0),deadline:deadline||''});
     save(KEYS.spots,spots); renderSpots();
-    $('#spot-title').value=''; $('#spot-blogger').value='';
-    $('#spot-title').focus();
+    $('#spot-title').value=''; $('#spot-advance').value=''; $('#spot-income').value=''; $('#spot-deadline').value=''; $('#spot-title').focus();
   });
   $('#spot-list').addEventListener('click',function(e){
-    var del=e.target.closest('.btn-del');
-    if(!del) return;
-    spots=spots.filter(function(s){ return s.id!==del.dataset.id; });
-    save(KEYS.spots,spots); renderSpots();
-  });
-  $('#spot-list').addEventListener('input',function(e){
-    var ta=e.target.closest('.spot-idea');
-    if(!ta) return;
-    var s=find(spots,ta.dataset.id);
-    if(s){ s.idea=ta.value; save(KEYS.spots,spots); }   // 边写边存
+    var del=e.target.closest('.btn-del'); if(!del) return;
+    spots=spots.filter(function(s){return s.id!==del.dataset.id;}); save(KEYS.spots,spots); renderSpots();
   });
 
   /* ===== 事件：复盘（新增 / 删除） ===== */
@@ -738,7 +785,7 @@ input,select,textarea{outline:none}
     try{
       var backup={
         app:'goods-blogger-workbench',
-        version:2,
+        version:3,
         exportedAt:new Date().toISOString(),
         tasks:tasks,
         ideas:ideas,
@@ -767,14 +814,14 @@ input,select,textarea{outline:none}
     reader.onload=function(){
       try{
         var data=JSON.parse(reader.result);
-        if(!data || data.app!=='goods-blogger-workbench' || (data.version!==1 && data.version!==2) ||
+        if(!data || data.app!=='goods-blogger-workbench' || (data.version!==1 && data.version!==2 && data.version!==3) ||
            !validArray(data.tasks)||!validArray(data.ideas)||!validArray(data.spots)||!validArray(data.reviews)){
           throw new Error('invalid backup');
         }
         if(!confirm('导入后会覆盖当前的任务、灵感、热点和复盘数据。确定继续吗？')) return;
         tasks=data.tasks;
         ideas=data.ideas.map(function(i){ i.images=Array.isArray(i.images)?i.images:[]; return i; });
-        spots=data.spots;
+        spots=data.spots.map(function(s){ return {id:s.id||uid(),title:s.title||s.brand||'',advance:Number(s.advance||s.amount||0),income:Number(s.income||s.profit||0),deadline:s.deadline||s.publishDate||''}; });
         reviews=data.reviews;
         save(KEYS.tasks,tasks);
         save(KEYS.ideas,ideas);
