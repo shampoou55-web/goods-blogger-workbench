@@ -235,8 +235,23 @@ input,select,textarea{outline:none}
 
 /* ========== iPhone 窄屏自适应（侧栏宽度微调） ========== */
 @media (max-width:420px){
-  .sidebar{width:168px;flex-basis:168px}
+  .sidebar{width:150px;flex-basis:150px}
   .panel{padding:12px 10px 26px}
+  .spot-meta{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .money-box{padding:7px 8px}
+  .money-box b{font-size:14px;white-space:nowrap;word-break:normal;overflow:hidden;text-overflow:ellipsis}
+  .money-box span{font-size:10px;white-space:nowrap}
+  .spot-card{padding:10px}
+  .add-row{gap:6px}
+}
+
+/* 21:9 手机竖屏：为超窄内容区进一步压缩导航和卡片，避免金额/字段被挤成竖排 */
+@media (max-width:420px) and (orientation:portrait){
+  .sidebar{width:144px;flex-basis:144px}
+  .nav-item{padding-left:8px;padding-right:8px;font-size:13px}
+  .panel-title{font-size:19px}
+  .add-card{padding:10px;gap:8px}
+  .add-card input,.add-card select,.add-card textarea{padding-left:10px;padding-right:10px}
 }
 </style>
 </head>
