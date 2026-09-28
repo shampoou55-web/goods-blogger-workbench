@@ -19,18 +19,18 @@
          ========================================================== */
 
       :root {
-        --pink: #f4598b;
-        --pink-deep: #e4407a;
-        --pink-soft: #ffe4ef;
-        --ink: #262029;
-        --ink-2: #645d70;
-        --ink-3: #8a8290;
-        --card-bg: rgba(255, 255, 255, 0.74);
-        --card-border: rgba(255, 255, 255, 0.85);
-        --radius-lg: 26px;
-        --radius-md: 20px;
-        --shadow-card: 0 6px 18px rgba(206, 140, 172, 0.13);
-        --shadow-soft: 0 3px 10px rgba(206, 140, 172, 0.1);
+        --pink: #d86f98;
+        --pink-deep: #c3567f;
+        --pink-soft: #fff0f5;
+        --ink: #2b2630;
+        --ink-2: #665f69;
+        --ink-3: #938b95;
+        --card-bg: rgba(255, 255, 255, 0.9);
+        --card-border: rgba(255, 255, 255, 0.96);
+        --radius-lg: 24px;
+        --radius-md: 18px;
+        --shadow-card: 0 8px 22px rgba(191, 136, 161, 0.10);
+        --shadow-soft: 0 3px 10px rgba(191, 136, 161, 0.08);
         --nav-h: 78px;
       }
 
@@ -50,7 +50,7 @@
         font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
           'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
         color: var(--ink);
-        background: #f4eef3;
+        background: #f8f4f6;
         overscroll-behavior-y: none;
       }
 
@@ -99,20 +99,19 @@
         min-height: 100vh;
         min-height: 100dvh;
         background:
-          radial-gradient(120% 55% at 8% -6%, rgba(255, 214, 232, 0.95) 0%, rgba(255, 232, 244, 0) 60%),
-          radial-gradient(110% 50% at 100% 4%, rgba(232, 220, 255, 0.9) 0%, rgba(240, 232, 255, 0) 62%),
-          radial-gradient(120% 60% at 50% 108%, rgba(255, 222, 238, 0.85) 0%, rgba(255, 240, 248, 0) 60%),
-          linear-gradient(170deg, #fdf1f6 0%, #f8f0fb 42%, #fdfaff 100%);
+          radial-gradient(120% 55% at 8% -6%, rgba(255, 224, 237, 0.86) 0%, rgba(255, 239, 246, 0) 58%),
+          radial-gradient(110% 50% at 100% 4%, rgba(255, 244, 248, 0.92) 0%, rgba(255, 250, 252, 0) 62%),
+          radial-gradient(120% 60% at 50% 108%, rgba(255, 233, 241, 0.8) 0%, rgba(255, 248, 251, 0) 58%),
+          linear-gradient(170deg, #fff9fb 0%, #fff5f8 44%, #ffffff 100%);
         background-attachment: fixed;
         overflow-x: hidden;
       }
 
       .app-shell[data-tone='finance'] {
         background:
-          radial-gradient(120% 55% at 6% -6%, rgba(214, 240, 248, 0.95) 0%, rgba(232, 246, 252, 0) 60%),
-          radial-gradient(110% 50% at 100% 2%, rgba(226, 236, 255, 0.9) 0%, rgba(238, 244, 255, 0) 62%),
-          radial-gradient(120% 60% at 50% 108%, rgba(226, 245, 240, 0.85) 0%, rgba(240, 252, 250, 0) 60%),
-          linear-gradient(170deg, #eef7fb 0%, #f2f2fc 45%, #fbfdff 100%);
+          radial-gradient(120% 52% at 8% -8%, rgba(255, 223, 236, 0.78) 0%, rgba(255, 245, 249, 0) 60%),
+          radial-gradient(110% 48% at 100% 2%, rgba(255, 246, 249, 0.94) 0%, rgba(255, 251, 253, 0) 62%),
+          linear-gradient(170deg, #fff9fb 0%, #fff7f9 42%, #ffffff 100%);
       }
 
       .app-main {
@@ -193,9 +192,9 @@
       }
 
       .btn-primary {
-        background: linear-gradient(135deg, #f873a2 0%, #ef4f86 100%);
+        background: linear-gradient(135deg, #df82a5 0%, #ce5f89 100%);
         color: #fff;
-        box-shadow: 0 8px 18px rgba(239, 79, 134, 0.32);
+        box-shadow: 0 8px 18px rgba(206, 95, 137, 0.24);
       }
 
       .btn-block {
@@ -349,8 +348,8 @@
       }
 
       .seg-mini button[data-active='true'] {
-        background: #9fd8ef;
-        color: #1d5f80;
+        background: #f5dbe5;
+        color: #b04e73;
       }
 
       /* ---------- 表单 ---------- */
@@ -700,8 +699,8 @@
         align-items: center;
         justify-content: center;
         color: #fff;
-        background: linear-gradient(135deg, #f873a2 0%, #ef4f86 100%);
-        box-shadow: 0 10px 26px rgba(239, 79, 134, 0.42);
+        background: linear-gradient(135deg, #df82a5 0%, #ce5f89 100%);
+        box-shadow: 0 10px 26px rgba(206, 95, 137, 0.28);
         z-index: 50;
         transition: transform 0.16s ease;
       }
@@ -1174,7 +1173,7 @@
       }
 
       .filter-pill[data-active='true'] {
-        background: linear-gradient(135deg, #f873a2 0%, #ef4f86 100%);
+        background: linear-gradient(135deg, #df82a5 0%, #ce5f89 100%);
         color: #fff;
         border-color: transparent;
         box-shadow: 0 6px 14px rgba(239, 79, 134, 0.3);
@@ -1253,10 +1252,115 @@
         letter-spacing: 0.4px;
       }
 
+      .finance-month-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin: 2px 0 14px;
+      }
+
+      .finance-month-current {
+        min-width: 0;
+        text-align: center;
+      }
+
+      .finance-month-current strong {
+        display: block;
+        font-size: 21px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+      }
+
+      .finance-month-current span {
+        display: block;
+        margin-top: 3px;
+        font-size: 11.5px;
+        color: var(--ink-3);
+      }
+
+      .finance-month-arrow:disabled {
+        opacity: 0.35;
+        cursor: default;
+      }
+
+      .finance-month-empty {
+        align-self: center;
+        padding: 8px 4px;
+        font-size: 12px;
+        color: var(--ink-3);
+      }
+
+      .finance-month-arrow {
+        width: 38px;
+        height: 38px;
+        border-radius: 13px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--pink-deep);
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(222, 194, 206, 0.65);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .finance-months {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 0 1px 5px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .finance-months::-webkit-scrollbar {
+        display: none;
+      }
+
+      .finance-month-pill {
+        flex: 0 0 auto;
+        min-width: 76px;
+        height: 34px;
+        padding: 0 13px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--ink-2);
+        background: rgba(255, 255, 255, 0.76);
+        border: 1px solid rgba(255, 255, 255, 0.96);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .finance-month-pill[data-active='true'] {
+        color: #fff;
+        background: linear-gradient(135deg, #df82a5 0%, #ce5f89 100%);
+        border-color: transparent;
+        box-shadow: 0 6px 14px rgba(206, 95, 137, 0.22);
+      }
+
       .stat-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
+      }
+
+      .finance-stat-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 9px;
+        margin-top: 10px;
+      }
+
+      .finance-stat-grid .stat-card {
+        padding: 13px 11px 14px;
+        border-radius: 18px;
+      }
+
+      .finance-stat-grid .stat-label {
+        font-size: 11.5px;
+      }
+
+      .finance-stat-grid .stat-value {
+        font-size: clamp(14px, 5.1vw, 19px);
       }
 
       .stat-card {
@@ -1289,30 +1393,30 @@
       }
 
       .stat-card[data-tone='income'] {
-        background: linear-gradient(160deg, #e6f8ee 0%, #ddf3e8 100%);
+        background: linear-gradient(160deg, #fff4f7 0%, #fce9ef 100%);
       }
 
       .stat-card[data-tone='income'] .stat-value,
       .stat-card[data-tone='income'] .stat-label svg {
-        color: #1f8a5f;
+        color: #ba5a7d;
       }
 
       .stat-card[data-tone='expense'] {
-        background: linear-gradient(160deg, #fde8e8 0%, #fbe0e0 100%);
+        background: linear-gradient(160deg, #fff8f9 0%, #f7e9ed 100%);
       }
 
       .stat-card[data-tone='expense'] .stat-value,
       .stat-card[data-tone='expense'] .stat-label svg {
-        color: #cc3a34;
+        color: #a76579;
       }
 
       .stat-card[data-tone='balance'] {
-        background: linear-gradient(160deg, #e3f0fb 0%, #dbeaf9 100%);
+        background: linear-gradient(160deg, #fff8fb 0%, #f6edf3 100%);
       }
 
       .stat-card[data-tone='balance'] .stat-value,
       .stat-card[data-tone='balance'] .stat-label svg {
-        color: #1f6f9c;
+        color: #8d6677;
       }
 
       .finance-list-head {
@@ -1348,13 +1452,13 @@
       }
 
       .finance-add-income {
-        background: #ddf5ea;
-        color: #1f8a5f;
+        background: #f8e8ee;
+        color: #b55778;
       }
 
       .finance-add-expense {
-        background: #fde5e3;
-        color: #c1352f;
+        background: #f5eaee;
+        color: #9e6175;
       }
 
       .finance-list {
@@ -1412,11 +1516,11 @@
       }
 
       .fin-amount[data-type='income'] {
-        color: #17915f;
+        color: #b55778;
       }
 
       .fin-amount[data-type='expense'] {
-        color: #d93a33;
+        color: #8f6978;
       }
 
       .fin-actions {
@@ -1429,7 +1533,7 @@
 
       @media (min-width: 520px) {
         body {
-          background: linear-gradient(160deg, #f0e7f0 0%, #eae6f3 100%);
+          background: linear-gradient(160deg, #f6f0f3 0%, #fbf8fa 100%);
         }
 
         .app-shell {
@@ -1488,28 +1592,28 @@
         /* ---------------- 配色（类型 / 状态 / 形式 / 选题 / 收支） ---------------- */
         const META = {
           type: {
-            广告: { dot: '#f4598b', bg: '#ffe4ef', text: '#d93d72', shadow: 'rgba(244,89,139,.32)' },
-            日常: { dot: '#2fa87a', bg: '#ddf5ea', text: '#218a63', shadow: 'rgba(47,168,122,.32)' }
+            广告: { dot: '#d86f98', bg: '#fff0f5', text: '#bd557f', shadow: 'rgba(216,111,152,.24)' },
+            日常: { dot: '#b9868e', bg: '#f7ecef', text: '#8e5f69', shadow: 'rgba(185,134,142,.20)' }
           },
           note: {
-            报备: { dot: '#3d8fdd', bg: '#e2eefc', text: '#2b74b8', shadow: 'rgba(61,143,221,.32)' },
-            水下: { dot: '#9a63dd', bg: '#efe6fd', text: '#7a44c0', shadow: 'rgba(154,99,221,.32)' },
+            报备: { dot: '#b886a0', bg: '#f5eaf0', text: '#875e72', shadow: 'rgba(184,134,160,.20)' },
+            水下: { dot: '#9b8291', bg: '#f1ecef', text: '#72616a', shadow: 'rgba(155,130,145,.18)' },
             无: { dot: '#9aa0ad', bg: '#eceef2', text: '#6f757f', shadow: 'rgba(154,160,173,.32)' }
           },
           format: {
-            单推: { dot: '#f08a35', bg: '#ffeedd', text: '#d1731f' },
-            合集: { dot: '#24b6a4', bg: '#d9f5f1', text: '#17907f' },
-            伪合集: { dot: '#6165dc', bg: '#e6e6fd', text: '#4a4ec4' }
+            单推: { dot: '#d18a76', bg: '#fbefe9', text: '#9f6856' },
+            合集: { dot: '#b47e90', bg: '#f3e7ec', text: '#86596b' },
+            伪合集: { dot: '#8e7d88', bg: '#efebee', text: '#6e626b' }
           },
           topic: {
-            灵感: { dot: '#f0a63c', bg: '#fff1dc', text: '#c9791a' },
-            写作中: { dot: '#3d8fdd', bg: '#e2eefc', text: '#2b74b8' },
-            待发布: { dot: '#9a63dd', bg: '#efe6fd', text: '#7a44c0' },
-            已发布: { dot: '#24b6a4', bg: '#d9f5f1', text: '#17907f' }
+            灵感: { dot: '#c59273', bg: '#fbf0e9', text: '#9e6d54' },
+            写作中: { dot: '#b87f96', bg: '#f5e9ef', text: '#8c5b70' },
+            待发布: { dot: '#907a86', bg: '#eee9ed', text: '#6d6069' },
+            已发布: { dot: '#7f9a8b', bg: '#edf3ef', text: '#617769' }
           },
           finance: {
-            income: { dot: '#2fa87a', bg: '#ddf5ea', text: '#218a63', shadow: 'rgba(47,168,122,.32)' },
-            expense: { dot: '#e0463f', bg: '#fde5e3', text: '#c1352f', shadow: 'rgba(224,70,63,.32)' }
+            income: { dot: '#cf6d93', bg: '#fff0f5', text: '#b24f76', shadow: 'rgba(207,109,147,.24)' },
+            expense: { dot: '#9b7180', bg: '#f4edf0', text: '#7e5b69', shadow: 'rgba(155,113,128,.18)' }
           }
         };
 
@@ -1706,6 +1810,7 @@
           topics: load(KEYS.topic, seedTopics),
           finance: load(KEYS.finance, seedFinance),
           cursor: yearMonth(todayISO()),
+          financeCursor: yearMonth(todayISO()),
           selectedDate: todayISO(),
           scheduleSort: 'asc',
           topicFilter: '全部',
@@ -1949,13 +2054,36 @@
            页面三：收支
            ========================================================== */
         function financePage() {
-          const stats = computeStats(state.finance, todayISO());
           const sorted = state.finance.slice().sort((a, b) =>
             a.date === b.date ? String(b.createdAt).localeCompare(String(a.createdAt)) : b.date.localeCompare(a.date)
           );
+          const monthKeys = [];
+          sorted.forEach((it) => {
+            const k = String(it.date).slice(0, 7);
+            if (/^\d{4}-\d{2}$/.test(k) && monthKeys.indexOf(k) < 0) monthKeys.push(k);
+          });
+          monthKeys.sort((a, b) => a.localeCompare(b));
+
+          let cursor = state.financeCursor || yearMonth(todayISO());
+          const initialKey = cursor.year + '-' + pad2(cursor.month);
+          if (monthKeys.length && monthKeys.indexOf(initialKey) < 0) {
+            cursor = yearMonth(monthKeys[monthKeys.length - 1] + '-01');
+            state.financeCursor = cursor;
+          }
+
+          const refISO = cursor.year + '-' + pad2(cursor.month) + '-01';
+          const stats = computeStats(state.finance, refISO);
           const filter = state.financeFilter;
-          const visible =
-            filter === '全部' ? sorted : sorted.filter((i) => i.type === (filter === '收入' ? 'income' : 'expense'));
+          const monthKey = cursor.year + '-' + pad2(cursor.month);
+          const monthItems = sorted.filter((i) => String(i.date).slice(0, 7) === monthKey);
+          const visible = filter === '全部'
+            ? monthItems
+            : monthItems.filter((i) => i.type === (filter === '收入' ? 'income' : 'expense'));
+
+          const currentMonthKey = monthKeys.indexOf(monthKey);
+          const hasMonths = monthKeys.length > 0;
+          const canPrevMonth = hasMonths && currentMonthKey > 0;
+          const canNextMonth = hasMonths && currentMonthKey >= 0 && currentMonthKey < monthKeys.length - 1;
 
           const statCard = (label, value, tone, ic) =>
             '<div class="stat-card" data-tone="' + tone + '">' +
@@ -1984,34 +2112,44 @@
               '</div>'
             : '<div class="card empty-card">' +
               '<div class="empty-icon">' + icon('walletMini', 30, 2) + '</div>' +
-              '<p class="empty-title">' + (filter === '全部' ? '还没有收支记录' : '还没有' + filter + '记录') + '</p>' +
+              '<p class="empty-title">' + (filter === '全部' ? formatMonthCN(cursor.year, cursor.month) + '还没有收支记录' : formatMonthCN(cursor.year, cursor.month) + '还没有' + filter + '记录') + '</p>' +
               '<p class="empty-desc">点上方「+ 收入」或「− 支出」记一笔吧</p>' +
               '</div>';
 
           return (
-            '<div class="finance-head"><h1 class="finance-title">收支统计</h1>' +
+            '<div class="finance-head"><h1 class="finance-title">收支</h1>' +
             '<div class="seg-mini">' +
             ['全部', '收入', '支出']
               .map((k) => '<button type="button" data-act="fin-filter" data-filter="' + k + '" data-active="' + (filter === k) + '">' + k + '</button>')
               .join('') +
             '</div></div>' +
 
-            '<div class="stat-grid">' +
-            statCard('当月收入', formatMoney(stats.monthIncome), 'income', icon('trendUp', 13, 2.6)) +
-            statCard('当月支出', formatMoney(stats.monthExpense), 'expense', icon('trendDown', 13, 2.6)) +
-            statCard('当月结余', formatMoney(stats.monthBalance), 'balance', icon('walletMini', 13, 2.4)) +
-            statCard('累计收入', formatMoney(stats.totalIncome), 'income', icon('trendUp', 13, 2.6)) +
-            statCard('累计支出', formatMoney(stats.totalExpense), 'expense', icon('trendDown', 13, 2.6)) +
-            statCard('累计结余', formatMoney(stats.totalBalance), 'balance', icon('walletMini', 13, 2.4)) +
+            '<div class="finance-month-nav">' +
+            '<button type="button" class="finance-month-arrow" data-act="finance-prev-month" aria-label="上一个有记录的月份" ' + (canPrevMonth ? '' : 'disabled') + '>' + icon('chevronLeft', 19, 2.6) + '</button>' +
+            '<div class="finance-month-current"><strong>' + formatMonthCN(cursor.year, cursor.month) + '</strong><span>' + monthItems.length + ' 笔记录</span></div>' +
+            '<button type="button" class="finance-month-arrow" data-act="finance-next-month" aria-label="下一个有记录的月份" ' + (canNextMonth ? '' : 'disabled') + '>' + icon('chevronRight', 19, 2.6) + '</button>' +
             '</div>' +
 
-            '<div class="finance-list-head"><h3>收支明细</h3><div class="finance-add">' +
+            '<div class="finance-months">' +
+            (monthKeys.length ? monthKeys.map((k) => {
+              const ym = yearMonth(k + '-01');
+              const label = ym.year + '.' + pad2(ym.month);
+              return '<button type="button" class="finance-month-pill" data-act="finance-month" data-year="' + ym.year + '" data-month="' + ym.month + '" data-active="' + (ym.year === cursor.year && ym.month === cursor.month) + '">' + label + '</button>';
+            }).join('') : '<span class="finance-month-empty">有记录后会自动生成月份</span>') +
+            '</div>' +
+
+            '<div class="stat-grid finance-stat-grid">' +
+            statCard('本月收入', formatMoney(stats.monthIncome), 'income', icon('trendUp', 13, 2.6)) +
+            statCard('本月支出', formatMoney(stats.monthExpense), 'expense', icon('trendDown', 13, 2.6)) +
+            statCard('本月结余', formatMoney(stats.monthBalance), 'balance', icon('walletMini', 13, 2.4)) +
+            '</div>' +
+
+            '<div class="finance-list-head"><div><h3>' + formatMonthCN(cursor.year, cursor.month) + '明细</h3><span>' + visible.length + ' 条' + (filter === '全部' ? '' : ' · ' + filter) + '</span></div><div class="finance-add">' +
             '<button type="button" class="finance-add-income" data-act="new-finance" data-kind="income">+ 收入</button>' +
             '<button type="button" class="finance-add-expense" data-act="new-finance" data-kind="expense">− 支出</button>' +
             '</div></div>' +
 
-            '<p class="hint" style="padding:0 2px 14px">共 ' + visible.length +
-            ' 条记录 · 当月口径 ' + Number(todayISO().slice(5, 7)) + '月，累计为全部历史</p>' +
+            '<p class="hint" style="padding:0 2px 14px">这里只显示已有收支记录的月份；新增记录后会自动归入对应月份。</p>' +
             list
           );
         }
@@ -2220,11 +2358,15 @@
         }
 
         function openFinanceForm(type, item) {
+          const cursor = state.financeCursor || yearMonth(todayISO());
+          const cursorMonth = cursor.year + '-' + pad2(cursor.month);
+          const today = todayISO();
+          const defaultDate = today.slice(0, 7) === cursorMonth ? today : cursorMonth + '-01';
           state.sheet = {
             kind: 'finance',
             form: item
               ? { id: item.id, type: item.type, category: item.category, date: item.date, amount: String(item.amount), description: item.description, error: '' }
-              : { id: null, type: type, category: FIN_CATEGORIES[type][0], date: todayISO(), amount: '', description: '', error: '' }
+              : { id: null, type: type, category: FIN_CATEGORIES[type][0], date: defaultDate, amount: '', description: '', error: '' }
           };
           render();
         }
@@ -2310,6 +2452,7 @@
             state.finance = state.finance.concat([Object.assign({ id: uid('fin'), createdAt: stamp, updatedAt: stamp }, payload)]);
           }
           save(KEYS.finance, state.finance);
+          state.financeCursor = yearMonth(f.date);
           state.sheet = null;
           render();
         }
@@ -2447,6 +2590,33 @@
 
             case 'fin-filter':
               state.financeFilter = btn.dataset.filter;
+              render();
+              break;
+
+            case 'finance-prev-month': {
+              const keys = Array.from(new Set(state.finance.map((i) => String(i.date).slice(0, 7))))
+                .filter((k) => /^\d{4}-\d{2}$/.test(k))
+                .sort((a, b) => a.localeCompare(b));
+              const cur = (state.financeCursor.year + '-' + pad2(state.financeCursor.month));
+              const idx = keys.indexOf(cur);
+              if (idx > 0) state.financeCursor = yearMonth(keys[idx - 1] + '-01');
+              render();
+              break;
+            }
+
+            case 'finance-next-month': {
+              const keys = Array.from(new Set(state.finance.map((i) => String(i.date).slice(0, 7))))
+                .filter((k) => /^\d{4}-\d{2}$/.test(k))
+                .sort((a, b) => a.localeCompare(b));
+              const cur = (state.financeCursor.year + '-' + pad2(state.financeCursor.month));
+              const idx = keys.indexOf(cur);
+              if (idx >= 0 && idx < keys.length - 1) state.financeCursor = yearMonth(keys[idx + 1] + '-01');
+              render();
+              break;
+            }
+
+            case 'finance-month':
+              state.financeCursor = { year: Number(btn.dataset.year), month: Number(btn.dataset.month) };
               render();
               break;
 
