@@ -938,9 +938,18 @@
 
       .month-list-head {
         display: flex;
-        align-items: baseline;
+        align-items: center;
         justify-content: space-between;
+        gap: 10px;
         padding: 18px 2px 8px;
+      }
+
+      .month-list-head > div:first-child {
+        min-width: 0;
+      }
+
+      .schedule-sort {
+        flex: 0 0 auto;
       }
 
       .month-list-head h3 {
@@ -1698,6 +1707,7 @@
           finance: load(KEYS.finance, seedFinance),
           cursor: yearMonth(todayISO()),
           selectedDate: todayISO(),
+          scheduleSort: 'asc',
           topicFilter: '全部',
           financeFilter: '全部',
           sheet: null
@@ -1742,7 +1752,12 @@
           const prefix = year + '-' + pad2(month) + '-';
           const monthItems = state.schedule
             .filter((it) => it.date.indexOf(prefix) === 0)
-            .sort((a, b) => (a.date === b.date ? String(a.createdAt).localeCompare(String(b.createdAt)) : a.date.localeCompare(b.date)));
+            .sort((a, b) => {
+              const dateCmp = String(a.date).localeCompare(String(b.date));
+              if (dateCmp !== 0) return state.scheduleSort === 'desc' ? -dateCmp : dateCmp;
+              const createdCmp = String(a.createdAt).localeCompare(String(b.createdAt));
+              return state.scheduleSort === 'desc' ? -createdCmp : createdCmp;
+            });
 
           const byDate = {};
           monthItems.forEach((it) => {
@@ -1806,7 +1821,10 @@
             FORMATS.map((k) => '<span class="legend-item" style="--tag-dot:' + META.format[k].dot + '"><i class="legend-square"></i>' + k + '</span>').join('') +
             '</span></div>';
 
-          const dates = Object.keys(byDate).sort();
+          const dates = Object.keys(byDate).sort((a, b) => {
+            const cmp = String(a).localeCompare(String(b));
+            return state.scheduleSort === 'desc' ? -cmp : cmp;
+          });
           const listHTML = dates.length
             ? '<div class="sched-list">' +
               dates
@@ -1853,7 +1871,11 @@
 
             legend +
 
-            '<div class="month-list-head"><h3>本月排期</h3><span>共' + monthItems.length + '条</span></div>' +
+            '<div class="month-list-head"><div><h3>本月排期</h3><span>共' + monthItems.length + '条</span></div>' +
+            '<div class="seg-mini schedule-sort" aria-label="本月排期排序">' +
+            '<button type="button" data-act="schedule-sort" data-sort="asc" data-active="' + (state.scheduleSort === 'asc') + '">正序</button>' +
+            '<button type="button" data-act="schedule-sort" data-sort="desc" data-active="' + (state.scheduleSort === 'desc') + '">倒序</button>' +
+            '</div></div>' +
             '<div class="month-hint"><p class="hint">点日期可查看排期、新增或删除；用右下角 + 快速新增。</p></div>' +
             listHTML +
 
@@ -2179,6 +2201,7 @@
           state.selectedDate = date;
           state.sheet = {
             kind: 'schedule',
+            returnToDay: !!item,
             form: item
               ? { id: item.id, title: item.title, date: item.date, type: item.type, noteStatus: item.noteStatus, format: item.format, error: '' }
               : { id: null, title: '', date: date, type: '广告', noteStatus: '无', format: '单推', error: '' }
@@ -2230,7 +2253,7 @@
           save(KEYS.schedule, state.schedule);
           state.cursor = yearMonth(f.date);
           state.selectedDate = f.date;
-          state.sheet = { kind: 'day', date: f.date };
+          state.sheet = f.id && state.sheet.returnToDay ? { kind: 'day', date: f.date } : null;
           render();
         }
 
@@ -2346,6 +2369,11 @@
 
             case 'next-month':
               state.cursor = addMonths(state.cursor.year, state.cursor.month, 1);
+              render();
+              break;
+
+            case 'schedule-sort':
+              state.scheduleSort = btn.dataset.sort === 'desc' ? 'desc' : 'asc';
               render();
               break;
 
