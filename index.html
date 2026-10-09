@@ -1567,6 +1567,9 @@
         <button type="button" class="nav-item" data-act="tab" data-tab="schedule" data-active="true">
           <span data-icon="calendar" data-size="23"></span><span>排期</span>
         </button>
+        <button type="button" class="nav-item" data-act="tab" data-tab="shooting" data-active="false">
+          <span data-icon="camera" data-size="23"></span><span>拍摄</span>
+        </button>
         <button type="button" class="nav-item" data-act="tab" data-tab="topic" data-active="false">
           <span data-icon="file" data-size="23"></span><span>选题</span>
         </button>
@@ -1617,6 +1620,12 @@
           }
         };
 
+        // 拍摄栏目专用分类配色：与排期 META.type 完全分开，避免互相影响。
+        const SHOOTING_TYPE = {
+          广告: { dot: '#4d93d9', bg: '#e8f2ff', text: '#2f70b4', shadow: 'rgba(77,147,217,.28)' },
+          日常: { dot: '#ef7ca6', bg: '#ffe7f0', text: '#cf4f7e', shadow: 'rgba(239,124,166,.28)' }
+        };
+
         const TYPES = ['广告', '日常'];
         const NOTES = ['报备', '水下', '无'];
         const FORMATS = ['单推', '合集', '伪合集'];
@@ -1632,6 +1641,7 @@
         const ICONS = {
           calendar:
             '<rect x="3" y="4.5" width="18" height="17" rx="3.5"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/><path d="M8 13.5h.01M12 13.5h.01M16 13.5h.01M8 17h.01M12 17h.01"/>',
+          camera: '<path d="M4 7.5h3l1.5-2h7l1.5 2h3A2 2 0 0 1 22 9.5v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z"/><circle cx="12" cy="13.5" r="3.5"/>',
           file: '<path d="M14 2.5H7A2.5 2.5 0 0 0 4.5 5v14A2.5 2.5 0 0 0 7 21.5h10a2.5 2.5 0 0 0 2.5-2.5V8z"/><path d="M14 2.5V8h5.5"/><path d="M8.5 13h7M8.5 17h4.5"/>',
           wallet:
             '<path d="M20.5 9.5V7A2.5 2.5 0 0 0 18 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h12a2.5 2.5 0 0 0 2.5-2.5v-2.5"/><path d="M3.5 9.5h17"/><circle cx="17.5" cy="14.5" r="1.3"/>',
@@ -1727,7 +1737,7 @@
         }
 
         /* ---------------- localStorage ---------------- */
-        const KEYS = { schedule: 'scheduleItems', topic: 'topicItems', finance: 'financeItems', tab: 'activeTab' };
+        const KEYS = { schedule: 'scheduleItems', shooting: 'shootingItems', topic: 'topicItems', finance: 'financeItems', tab: 'activeTab' };
 
         function load(key, seedFn) {
           try {
@@ -1773,6 +1783,10 @@
           }));
         }
 
+        function seedShooting() {
+          return [];
+        }
+
         function seedTopics() {
           return [];
         }
@@ -1798,7 +1812,7 @@
         const readTab = () => {
           try {
             const t = window.localStorage.getItem(KEYS.tab);
-            return t === 'topic' || t === 'finance' ? t : 'schedule';
+            return ['schedule', 'shooting', 'topic', 'finance'].includes(t) ? t : 'schedule';
           } catch (e) {
             return 'schedule';
           }
@@ -1807,12 +1821,16 @@
         const state = {
           tab: readTab(),
           schedule: load(KEYS.schedule, seedSchedule),
+          shooting: load(KEYS.shooting, seedShooting),
           topics: load(KEYS.topic, seedTopics),
           finance: load(KEYS.finance, seedFinance),
           cursor: yearMonth(todayISO()),
+          shootingCursor: yearMonth(todayISO()),
           financeCursor: yearMonth(todayISO()),
           selectedDate: todayISO(),
+          shootingSelectedDate: todayISO(),
           scheduleSort: 'asc',
+          shootingSort: 'asc',
           topicFilter: '全部',
           financeFilter: '全部',
           sheet: null
@@ -1989,7 +2007,120 @@
         }
 
         /* ==========================================================
-           页面二：选题规划
+           页面二：拍摄日历（布局沿用排期日历，分类仅保留广告 / 日常）
+           ========================================================== */
+        function shootingPage() {
+          const { year, month } = state.shootingCursor;
+          const today = todayISO();
+          const prefix = year + '-' + pad2(month) + '-';
+          const monthItems = state.shooting
+            .filter((it) => it.date.indexOf(prefix) === 0)
+            .sort((a, b) => {
+              const dateCmp = String(a.date).localeCompare(String(b.date));
+              if (dateCmp !== 0) return state.shootingSort === 'desc' ? -dateCmp : dateCmp;
+              const createdCmp = String(a.createdAt).localeCompare(String(b.createdAt));
+              return state.shootingSort === 'desc' ? -createdCmp : createdCmp;
+            });
+
+          const byDate = {};
+          monthItems.forEach((it) => {
+            (byDate[it.date] = byDate[it.date] || []).push(it);
+          });
+
+          const weeks = buildMonthGrid(year, month);
+          const gridHTML = weeks
+            .map((week) =>
+              '<div class="calendar-week">' +
+              week.map((cell) => {
+                if (!cell) return '<div class="calendar-cell calendar-cell-empty"></div>';
+                const items = byDate[cell.iso] || [];
+                const shown = items.slice(0, 2);
+                const rest = items.length - shown.length;
+                const cellTypes = Array.from(new Set(items.map((it) => it.type)));
+                let cellBg = '';
+                if (cellTypes.length === 1 && SHOOTING_TYPE[cellTypes[0]]) {
+                  cellBg = 'background:' + SHOOTING_TYPE[cellTypes[0]].bg + ';';
+                } else if (cellTypes.includes('广告') && cellTypes.includes('日常')) {
+                  cellBg = 'background:linear-gradient(135deg,' + SHOOTING_TYPE['广告'].bg + ' 0%, ' + SHOOTING_TYPE['广告'].bg + ' 50%, ' + SHOOTING_TYPE['日常'].bg + ' 50%, ' + SHOOTING_TYPE['日常'].bg + ' 100%);';
+                }
+                return (
+                  '<button type="button" class="calendar-cell" data-act="shooting-date" data-date="' + cell.iso +
+                  '" data-today="' + (cell.iso === today) + '" data-selected="' + (cell.iso === state.shootingSelectedDate) +
+                  '" data-has-items="' + (items.length > 0) + '"' + (cellBg ? ' style="' + cellBg + '"' : '') + '>' +
+                  '<span class="calendar-daynum">' + cell.day + '</span>' +
+                  '<span class="calendar-tags">' +
+                  shown.map((it) =>
+                    '<span class="calendar-tag">' +
+                    '<span class="calendar-tag-chip" style="--tag-bg:' + SHOOTING_TYPE[it.type].bg +
+                    ';--tag-text:' + SHOOTING_TYPE[it.type].text + ';--tag-dot:' + SHOOTING_TYPE[it.type].dot + '">' +
+                    '<i class="calendar-tag-dot"></i>' + esc(it.type) + '</span>' +
+                    '<span class="calendar-tag-title">' + esc(it.title) + '</span>' +
+                    '</span>'
+                  ).join('') +
+                  (rest > 0 ? '<span class="calendar-more">+' + rest + '</span>' : '') +
+                  '</span></button>'
+                );
+              }).join('') +
+              '</div>'
+            ).join('');
+
+          const legend =
+            '<div class="calendar-legend"><span class="legend-group"><span class="legend-title">类型</span>' +
+            TYPES.map((k) => '<span class="legend-item" style="--tag-dot:' + SHOOTING_TYPE[k].dot + '"><i class="legend-dot"></i>' + k + '</span>').join('') +
+            '</span></div>';
+
+          const dates = Object.keys(byDate).sort((a, b) => {
+            const cmp = String(a).localeCompare(String(b));
+            return state.shootingSort === 'desc' ? -cmp : cmp;
+          });
+          const listHTML = dates.length
+            ? '<div class="sched-list">' + dates.map((date) => {
+                const items = byDate[date];
+                return (
+                  '<article class="card sched-card">' +
+                  '<div class="sched-card-head"><div>' +
+                  '<h3 class="sched-day">' + formatDayCN(date) + '</h3>' +
+                  '<p class="sched-count">' + items.length + '条拍摄</p>' +
+                  '</div><button type="button" class="sched-manage" data-act="shooting-open-day" data-date="' + date + '">管理</button></div>' +
+                  '<div class="sched-tags">' +
+                  items.map((it) =>
+                    '<button type="button" class="sched-tag" data-act="shooting-open-day" data-date="' + date +
+                    '" style="--tag-bg:' + SHOOTING_TYPE[it.type].bg + ';--tag-dot:' + SHOOTING_TYPE[it.type].dot +
+                    '" title="' + esc(it.type + ' · ' + it.title) + '">' +
+                    '<i class="sched-tag-dot"></i><span class="sched-tag-name">' + esc(it.type + ' ' + it.title) + '</span></button>'
+                  ).join('') +
+                  '</div></article>'
+                );
+              }).join('') + '</div>'
+            : '<div class="card empty-card"><p class="empty-title">这个月还没有拍摄</p><p class="empty-desc">点右下角 + 添加第一条拍摄计划吧</p></div>';
+
+          return (
+            '<div class="sched-head-row"><div>' +
+            '<h1 class="page-title">拍摄日历</h1>' +
+            '<p class="page-sub">' + formatMonthCN(year, month) + ' · 共' + monthItems.length + '条拍摄</p>' +
+            '</div><button type="button" class="btn-today" data-act="shooting-today">今天</button></div>' +
+            '<div class="month-nav"><h2>' + formatMonthCN(year, month) + '</h2>' +
+            '<div class="month-arrows">' +
+            '<button type="button" data-act="shooting-prev-month" aria-label="上个月">' + icon('chevronLeft', 20, 2.6) + '</button>' +
+            '<button type="button" data-act="shooting-next-month" aria-label="下个月">' + icon('chevronRight', 20, 2.6) + '</button>' +
+            '</div></div>' +
+            '<section class="calendar"><div class="calendar-weekdays">' +
+            ['一', '二', '三', '四', '五', '六', '日'].map((w) => '<span>' + w + '</span>').join('') +
+            '</div><div class="calendar-grid">' + gridHTML + '</div></section>' +
+            legend +
+            '<div class="month-list-head"><div><h3>本月拍摄</h3><span>共' + monthItems.length + '条</span></div>' +
+            '<div class="seg-mini schedule-sort" aria-label="本月拍摄排序">' +
+            '<button type="button" data-act="shooting-sort" data-sort="asc" data-active="' + (state.shootingSort === 'asc') + '">正序</button>' +
+            '<button type="button" data-act="shooting-sort" data-sort="desc" data-active="' + (state.shootingSort === 'desc') + '">倒序</button>' +
+            '</div></div>' +
+            '<div class="month-hint"><p class="hint">点日期可查看、新增或删除拍摄计划；用右下角 + 快速新增。</p></div>' +
+            listHTML +
+            '<button type="button" class="fab" data-act="shooting-fab-add" aria-label="快速新增拍摄">' + icon('plus', 26, 2.8) + '</button>'
+          );
+        }
+
+        /* ==========================================================
+           页面三：选题规划
            ========================================================== */
         function topicPage() {
           const all = state.topics;
@@ -2213,6 +2344,42 @@
             foot =
               '<button type="button" class="btn btn-primary btn-block" data-act="add-schedule" data-date="' + s.date + '">' +
               icon('plus', 18, 2.8) + '添加排期</button>';
+          } else if (s.kind === 'shooting-day') {
+            title = formatMonthDayCN(s.date) + ' 拍摄';
+            const items = state.shooting
+              .filter((i) => i.date === s.date)
+              .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+            body = items.length
+              ? '<div class="day-list">' + items.map((it) =>
+                  '<div class="day-item">' +
+                  '<div class="day-item-head"><h3 class="day-item-title">' + esc(it.title) + '</h3>' +
+                  '<div class="day-item-actions">' +
+                  '<button type="button" data-act="edit-shooting" data-id="' + it.id + '">编辑</button>' +
+                  '<button type="button" data-act="del-shooting" data-id="' + it.id + '" data-from="day">删除</button>' +
+                  '</div></div>' +
+                  '<div class="day-item-chips">' + chip(SHOOTING_TYPE[it.type], '类型 · ' + it.type) + '</div>' +
+                  '</div>'
+                ).join('') + '</div>'
+              : '<div class="day-empty"><p class="day-empty-title">这一天还没有拍摄计划</p><p class="day-empty-desc">点下方按钮添加一条吧</p></div>';
+            foot = '<button type="button" class="btn btn-primary btn-block" data-act="add-shooting" data-date="' + s.date + '">' + icon('plus', 18, 2.8) + '添加拍摄</button>';
+          } else if (s.kind === 'shooting') {
+            const f = s.form;
+            title = f.id ? '编辑拍摄' : '新增拍摄';
+            body =
+              '<div class="field"><label class="field-label" for="f-shooting-title">拍摄内容</label>' +
+              '<input id="f-shooting-title" class="input" data-field="title" maxlength="40" placeholder="拍什么？（如：护肤品口播）" value="' + esc(f.title) + '"></div>' +
+              '<div class="field"><span class="field-label">日期</span><div class="date-row">' +
+              '<div class="date-field"><span class="date-field-text" data-date-label>' + formatDateCN(f.date) + '</span>' +
+              '<input class="date-field-input" type="date" data-field="date" value="' + esc(f.date) + '">' +
+              '<button type="button" class="date-field-icon" data-act="open-picker" aria-label="打开日期选择">' + icon('calendar', 17, 2.4) + '</button></div>' +
+              '<button type="button" class="btn-today" data-act="set-today">今天</button>' +
+              '</div></div>' +
+              '<div class="field"><span class="field-label">类型</span>' +
+              segPills('type', TYPES, f.type, (o) => SHOOTING_TYPE[o]) + '</div>' +
+              '<p class="form-error" data-show="' + !!f.error + '">' + esc(f.error || '') + '</p>';
+            foot =
+              (f.id ? '<button type="button" class="btn btn-danger" data-act="del-shooting" data-id="' + f.id + '" data-from="form" data-armed="false" data-label="删除">删除</button>' : '') +
+              '<button type="button" class="btn btn-primary btn-block" data-act="save-shooting">保存拍摄</button>';
           } else if (s.kind === 'schedule') {
             const f = s.form;
             title = f.id ? '编辑排期' : '新增排期';
@@ -2347,6 +2514,24 @@
           render();
         }
 
+        function openShootingDay(date) {
+          state.shootingSelectedDate = date;
+          state.sheet = { kind: 'shooting-day', date };
+          render();
+        }
+
+        function openShootingForm(date, item) {
+          state.shootingSelectedDate = date;
+          state.sheet = {
+            kind: 'shooting',
+            returnToDay: !!item,
+            form: item
+              ? { id: item.id, title: item.title, date: item.date, type: item.type, error: '' }
+              : { id: null, title: '', date: date, type: '广告', error: '' }
+          };
+          render();
+        }
+
         function openTopicForm(item) {
           state.sheet = {
             kind: 'topic',
@@ -2404,6 +2589,39 @@
           state.schedule = state.schedule.filter((i) => i.id !== id);
           save(KEYS.schedule, state.schedule);
           if (from === 'form') state.sheet = item ? { kind: 'day', date: item.date } : null;
+          render();
+        }
+
+        function saveShooting() {
+          const f = state.sheet.form;
+          const title = String(f.title || '').trim();
+          if (!title) { f.error = '请先填写拍摄内容'; renderSheet(); return; }
+          if (!isValidISO(f.date)) { f.error = '请选择日期'; renderSheet(); return; }
+
+          const stamp = nowStamp();
+          if (f.id) {
+            state.shooting = state.shooting.map((i) =>
+              i.id === f.id
+                ? { id: i.id, title: title, date: f.date, type: f.type, createdAt: i.createdAt, updatedAt: stamp }
+                : i
+            );
+          } else {
+            state.shooting = state.shooting.concat([
+              { id: uid('shoot'), title: title, date: f.date, type: f.type, createdAt: stamp, updatedAt: stamp }
+            ]);
+          }
+          save(KEYS.shooting, state.shooting);
+          state.shootingCursor = yearMonth(f.date);
+          state.shootingSelectedDate = f.date;
+          state.sheet = f.id && state.sheet.returnToDay ? { kind: 'shooting-day', date: f.date } : null;
+          render();
+        }
+
+        function deleteShooting(id, from) {
+          const item = state.shooting.filter((i) => i.id === id)[0];
+          state.shooting = state.shooting.filter((i) => i.id !== id);
+          save(KEYS.shooting, state.shooting);
+          if (from === 'form') state.sheet = item ? { kind: 'shooting-day', date: item.date } : null;
           render();
         }
 
@@ -2497,6 +2715,57 @@
               try { window.localStorage.setItem(KEYS.tab, state.tab); } catch (err) {}
               window.scrollTo(0, 0);
               render();
+              break;
+
+            case 'shooting-today':
+              state.shootingCursor = yearMonth(todayISO());
+              state.shootingSelectedDate = todayISO();
+              render();
+              break;
+
+            case 'shooting-prev-month':
+              state.shootingCursor = addMonths(state.shootingCursor.year, state.shootingCursor.month, -1);
+              render();
+              break;
+
+            case 'shooting-next-month':
+              state.shootingCursor = addMonths(state.shootingCursor.year, state.shootingCursor.month, 1);
+              render();
+              break;
+
+            case 'shooting-sort':
+              state.shootingSort = btn.dataset.sort === 'desc' ? 'desc' : 'asc';
+              render();
+              break;
+
+            case 'shooting-date':
+              openShootingForm(btn.dataset.date, null);
+              break;
+
+            case 'shooting-open-day':
+              openShootingDay(btn.dataset.date);
+              break;
+
+            case 'shooting-fab-add':
+              openShootingForm(state.shootingSelectedDate || todayISO(), null);
+              break;
+
+            case 'add-shooting':
+              openShootingForm(btn.dataset.date, null);
+              break;
+
+            case 'edit-shooting': {
+              const item = state.shooting.filter((i) => i.id === btn.dataset.id)[0];
+              if (item) openShootingForm(item.date, item);
+              break;
+            }
+
+            case 'save-shooting':
+              saveShooting();
+              break;
+
+            case 'del-shooting':
+              if (btn.dataset.from === 'day' || armOrRun(btn)) deleteShooting(btn.dataset.id, btn.dataset.from);
               break;
 
             case 'today':
@@ -2710,7 +2979,9 @@
         function render() {
           shellEl().dataset.tone = state.tab === 'finance' ? 'finance' : 'default';
           mainEl().innerHTML =
-            state.tab === 'schedule' ? schedulePage() : state.tab === 'topic' ? topicPage() : financePage();
+            state.tab === 'schedule' ? schedulePage() :
+            state.tab === 'shooting' ? shootingPage() :
+            state.tab === 'topic' ? topicPage() : financePage();
 
           document.querySelectorAll('#nav .nav-item').forEach((b) => {
             b.dataset.active = String(b.dataset.tab === state.tab);
